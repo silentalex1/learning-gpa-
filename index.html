@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearningGPA</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">LearningGPA</div>
+            <div class="nav-links">
+                <button id="classesBtn" class="nav-btn">Classes</button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Work more efficient. More Faster.</h1>
+                <p>Start by getting your grades up solving problems with LearningGPA.</p>
+                <button id="getStartedBtn" class="cta-btn">Get Started <span>>></span></button>
+            </div>
+        </section>
+
+        <section class="help">
+            <div class="container">
+                <h2>How can LearningGPA Help You?</h2>
+                <p>We offer various tools for you to use with your classes. Using these tools on our site can help you solve questions step by step and bring your grades up like a pro - fast and efficient.</p>
+            </div>
+        </section>
+
+        <section class="cta">
+            <div class="container">
+                <h2>Ready to work more efficient with your class lessons online?</h2>
+                <button id="tryNowBtn" class="cta-btn">Try LearningGPA Now</button>
+            </div>
+            <img src="learningschedule.png" alt="Learning Schedule" class="schedule-img">
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 LearningGPA. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="classModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Select Your Class</h2>
+            <div class="class-grid">
+                <a href="/algebragpa" class="class-btn">Algebra</a>
+                <a href="/biologygpa" class="class-btn">Biology</a>
+                <a href="/chemistrygpa" class="class-btn">Chemistry</a>
+                <a href="/englishgpa" class="class-btn">English</a>
+                <a href="/historygpa" class="class-btn">History</a>
+                <a href="/physicgpa" class="class-btn">Physics</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-slideshow">
+        <div class="slide active" style="background-image: url('learningbackground.png');"></div>
+        <div class="slide" style="background-image: url('background2.png');"></div>
+        <div class="slide" style="background-image: url('learningkids.png');"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

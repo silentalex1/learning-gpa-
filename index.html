@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learning GPA</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Import Puter.js -->
     <script src="https://js.puter.com/v2/"></script>
-    <!-- Import FunctionPlot for graphing capabilities -->
     <script src="https://unpkg.com/function-plot/dist/function-plot.js"></script>
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-
     <nav class="navbar">
         <div class="logo">Learning GPA</div>
         <div class="class-selector">
@@ -32,23 +28,21 @@
     <main class="chat-container">
         <div id="chatHistory" class="chat-history">
             <div class="ai-message">
-                Hello! I am your <span id="currentSubjectSpan">Geometry</span> assistant. I can help with graphs, crosswords, and solving problems.
+                Hello. I am your <span id="currentSubjectSpan">Geometry</span> assistant.
             </div>
         </div>
         
-        <!-- container for graphs -->
         <div id="graphContainer" class="graph-container hidden">
             <div id="graphTarget"></div>
             <button id="closeGraph" class="close-graph">x</button>
         </div>
 
         <div class="input-area">
-            <textarea id="userInput" placeholder="Ask anything about Geometry..."></textarea>
+            <textarea id="userInput" placeholder="Enter your query here..."></textarea>
             <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
         </div>
     </main>
 
-    <!-- Modal for Adding Class -->
     <div id="addClassModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">

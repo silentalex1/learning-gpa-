@@ -3,72 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LearningGPA</title>
-    <link rel="stylesheet" href="./style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Learning GPA</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Import Puter.js -->
+    <script src="https://js.puter.com/v2/"></script>
+    <!-- Import FunctionPlot for graphing capabilities -->
+    <script src="https://unpkg.com/function-plot/dist/function-plot.js"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+
     <nav class="navbar">
-        <div class="container">
-            <div class="logo">LearningGPA</div>
-            <div class="nav-links">
-                <button id="classesBtn" class="nav-btn">Classes</button>
-            </div>
+        <div class="logo">Learning GPA</div>
+        <div class="class-selector">
+            <select id="classDropdown">
+                <option value="Geometry">Geometry</option>
+                <option value="add_new_class_trigger">+ Add your class</option>
+            </select>
+        </div>
+        <button id="loginBtn" class="auth-btn">Login <i class="fas fa-sign-in-alt"></i></button>
+        <div id="userProfile" class="user-profile hidden">
+            <span id="username">User</span>
+            <button id="logoutBtn" class="auth-btn">Logout</button>
         </div>
     </nav>
 
-    <main>
-        <section class="hero">
-            <div class="container">
-                <h1>Work more efficient. More Faster.</h1>
-                <p>Start by getting your grades up solving problems with LearningGPA.</p>
-                <button id="getStartedBtn" class="cta-btn">Get Started <span>>></span></button>
+    <main class="chat-container">
+        <div id="chatHistory" class="chat-history">
+            <div class="ai-message">
+                Hello! I am your <span id="currentSubjectSpan">Geometry</span> assistant. I can help with graphs, crosswords, and solving problems.
             </div>
-        </section>
+        </div>
+        
+        <!-- container for graphs -->
+        <div id="graphContainer" class="graph-container hidden">
+            <div id="graphTarget"></div>
+            <button id="closeGraph" class="close-graph">x</button>
+        </div>
 
-        <section class="help">
-            <div class="container">
-                <h2>How can LearningGPA Help You?</h2>
-                <p>We offer various tools for you to use with your classes. Using these tools on our site can help you solve questions step by step and bring your grades up like a pro - fast and efficient.</p>
-            </div>
-        </section>
-
-        <section class="cta">
-            <div class="container">
-                <h2>Ready to work more efficient with your class lessons online?</h2>
-                <button id="tryNowBtn" class="cta-btn">Try LearningGPA Now</button>
-            </div>
-            <img src="learningschedule.png" alt="Learning Schedule" class="schedule-img">
-        </section>
+        <div class="input-area">
+            <textarea id="userInput" placeholder="Ask anything about Geometry..."></textarea>
+            <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>
     </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 LearningGPA. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <div id="classModal" class="modal">
+    <!-- Modal for Adding Class -->
+    <div id="addClassModal" class="modal hidden">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Select Your Class</h2>
-            <div class="class-grid">
-                <a href="/algebragpa" class="class-btn">Algebra</a>
-                <a href="/biologygpa" class="class-btn">Biology</a>
-                <a href="/chemistrygpa" class="class-btn">Chemistry</a>
-                <a href="/englishgpa" class="class-btn">English</a>
-                <a href="/historygpa" class="class-btn">History</a>
-                <a href="/physicgpa" class="class-btn">Physics</a>
+            <div class="modal-header">
+                <h2>Class Subject</h2>
+                <button id="closeModal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="newClassName" placeholder="Enter your class name here.">
+                <button id="submitClassBtn">Submit</button>
             </div>
         </div>
     </div>
 
-    <div class="bg-slideshow">
-        <div class="slide active" style="background-image: url('./learningbackground.png');"></div>
-        <div class="slide" style="background-image: url('./background2.png');"></div>
-        <div class="slide" style="background-image: url('./learningkids.png');"></div>
-    </div>
-
-    <script src="/script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

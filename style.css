@@ -21,7 +21,6 @@ body {
     flex-direction: column;
 }
 
-/* Navbar */
 .navbar {
     background-color: white;
     padding: 15px 20px;
@@ -74,7 +73,6 @@ body {
     display: none !important;
 }
 
-/* Chat Area */
 .chat-container {
     flex: 1;
     display: flex;
@@ -119,7 +117,6 @@ body {
     border-bottom-left-radius: 2px;
 }
 
-/* Graph Container */
 .graph-container {
     position: absolute;
     top: 50%;
@@ -143,7 +140,6 @@ body {
     cursor: pointer;
 }
 
-/* Input Area */
 .input-area {
     padding: 20px;
     border-top: 1px solid #eee;
@@ -177,7 +173,6 @@ textarea {
     transform: scale(1.05);
 }
 
-/* Modal */
 .modal {
     position: fixed;
     top: 0;
@@ -234,7 +229,6 @@ textarea {
     cursor: pointer;
 }
 
-/* Responsive */
 @media (max-width: 600px) {
     .navbar {
         flex-direction: column;

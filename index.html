@@ -3,58 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning GPA</title>
+    <title>Learning GPA - Coordinate Plotter</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://js.puter.com/v2/"></script>
-    <script src="https://unpkg.com/function-plot/dist/function-plot.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">Learning GPA</div>
-        <div class="class-selector">
-            <select id="classDropdown">
-                <option value="Geometry">Geometry</option>
-                <option value="add_new_class_trigger">+ Add your class</option>
-            </select>
-        </div>
-        <button id="loginBtn" class="auth-btn">Login <i class="fas fa-sign-in-alt"></i></button>
-        <div id="userProfile" class="user-profile hidden">
-            <span id="username">User</span>
-            <button id="logoutBtn" class="auth-btn">Logout</button>
-        </div>
-    </nav>
 
-    <main class="chat-container">
-        <div id="chatHistory" class="chat-history">
-            <div class="ai-message">
-                Hello. I am your <span id="currentSubjectSpan">Geometry</span> assistant.
+    <header class="header">
+        <h1>Learning GPA</h1>
+        <p>Input your graph or geometry problem for precise plot points and coordinate solutions.</p>
+    </header>
+
+    <main class="container">
+        <section class="input-section card">
+            <label for="problemInput" class="input-label">Enter Graph Equation or Geometry Problem</label>
+            <textarea id="problemInput" placeholder="Type your equation (e.g., y = 2x + 1) or geometry problem (e.g., find midpoint of (2,3) and (8,1))"></textarea>
+            <button class="solve-button">Calculate Accurate Solutions</button>
+        </section>
+
+        <section class="geometry-tools-section card">
+            <h2 class="tools-title">Geometry Coordinate Tools</h2>
+            <div class="tool-list">
+                <div class="tool-item">Distance Formula</div>
+                <div class="tool-item">Midpoint Calculation</div>
+                <div class="tool-item">Area by Coordinates</div>
+                <div class="tool-item">Line Slope and Y-Intercept</div>
             </div>
-        </div>
+            <p class="tool-note">Enter coordinates in the main input box to use these specific tools.</p>
+        </section>
+
+        <section class="output-section card">
+            <h2 class="output-title">Precise Plot Points & Coordinates</h2>
+            <div id="solutionBox" class="solution-box">
+                <p>Calculated (x, y) points and geometry results will appear here.</p>
+            </div>
+        </section>
         
-        <div id="graphContainer" class="graph-container hidden">
-            <div id="graphTarget"></div>
-            <button id="closeGraph" class="close-graph">x</button>
-        </div>
-
-        <div class="input-area">
-            <textarea id="userInput" placeholder="Enter your query here..."></textarea>
-            <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
-        </div>
     </main>
-
-    <div id="addClassModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Class Subject</h2>
-                <button id="closeModal" class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="newClassName" placeholder="Enter your class name here.">
-                <button id="submitClassBtn">Submit</button>
-            </div>
-        </div>
-    </div>
 
     <script src="script.js"></script>
 </body>

@@ -212,6 +212,10 @@ canvas {
     background: white;
 }
 
+.hidden {
+    display: none !important;
+}
+
 @media (max-width: 768px) {
     .container {
         margin-top: -20px;

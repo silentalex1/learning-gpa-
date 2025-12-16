@@ -9,84 +9,122 @@
 <body class="theme-math">
 
     <div id="settingsModal" class="modal hidden">
-        <div class="modal-content">
-            <h2>AI Settings</h2>
-            <label>Enter your Gemini API key:</label>
-            <input type="password" id="apiKeyInput" placeholder="Paste key here...">
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="api-link">click here directly to get your api key.</a>
-            <div class="modal-actions">
-                <button id="saveKeyBtn">Save</button>
-                <button id="closeSettingsBtn" class="cancel-btn">Close</button>
+        <div class="modal-backdrop"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Unlock AI Power</h2>
+                <button id="closeSettingsBtn" class="close-icon">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>To use the AI helper, please enter your Gemini API Key below. This is saved locally on your device.</p>
+                <div class="api-input-wrapper">
+                    <input type="password" id="apiKeyInput" placeholder="Paste your key here (starts with AIza...)" autocomplete="off">
+                </div>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="api-link">click here directly to get your api key.</a>
+                <button id="saveKeyBtn" class="save-btn">Save Settings</button>
             </div>
         </div>
     </div>
 
     <header class="header">
-        <div class="top-bar">
-            <h1>Learning GPA.</h1>
-            <button id="settingsBtn" class="settings-icon">⚙️</button>
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>Learning GPA.</h1>
+                <p>able to solve ANY classes of your problem, get that f to a "A" in no time.</p>
+            </div>
+            <button id="settingsBtn" class="settings-btn" aria-label="Settings">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
         </div>
-        <p>able to solve ANY classes of your problem, get that f to a "A" in no time.</p>
         
         <nav class="subject-nav">
-            <button class="nav-btn active" data-subject="math">Math</button>
-            <button class="nav-btn" data-subject="english">English</button>
-            <button class="nav-btn" data-subject="history">History</button>
-            <button class="nav-btn" data-subject="science">Science</button>
+            <button class="nav-btn active" data-subject="math">
+                <span class="emoji">📐</span> Math
+            </button>
+            <button class="nav-btn" data-subject="english">
+                <span class="emoji">📚</span> English
+            </button>
+            <button class="nav-btn" data-subject="history">
+                <span class="emoji">📜</span> History
+            </button>
+            <button class="nav-btn" data-subject="science">
+                <span class="emoji">🧬</span> Science
+            </button>
         </nav>
     </header>
 
     <main class="container">
         
         <div id="mathView" class="view-section">
-            <section class="control-panel card">
-                <label class="input-label">Select Problem Type</label>
-                <div class="select-wrapper">
-                    <select id="mathMode" class="styled-select">
-                        <option value="linear">Linear Equation (y=mx+b)</option>
-                        <option value="intercepts">Line from Intercepts</option>
-                        <option value="geometry">Geometry (2 Points)</option>
-                        <option value="triangle_in">Triangle (Find 3rd Angle)</option>
-                        <option value="triangle_ex">Triangle (Find Exterior)</option>
-                    </select>
-                </div>
+            <div class="layout-grid">
+                <section class="control-panel card">
+                    <div class="card-header">
+                        <h2>Input Problem</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="input-label">Select Problem Type</label>
+                        <div class="select-wrapper">
+                            <select id="mathMode" class="styled-select">
+                                <option value="linear">Linear Equation (y=mx+b)</option>
+                                <option value="intercepts">Line from Intercepts</option>
+                                <option value="geometry">Geometry (2 Points)</option>
+                                <option value="triangle_in">Triangle (Find 3rd Angle)</option>
+                                <option value="triangle_ex">Triangle (Find Exterior Angle)</option>
+                            </select>
+                        </div>
+                    </div>
 
-                <div class="input-area">
-                    <label id="inputLabel" class="input-label">Enter Equation</label>
-                    <div class="input-group">
-                        <input type="text" id="mathInput" placeholder="y = -x - 5" autocomplete="off">
-                        <button id="degreeBtn" class="icon-btn">°</button>
+                    <div class="form-group">
+                        <label id="inputLabel" class="input-label">Enter Values</label>
+                        <div class="input-group">
+                            <input type="text" id="mathInput" placeholder="y = -x - 5" autocomplete="off">
+                            <button id="degreeBtn" class="icon-btn" title="Add Degree Symbol">°</button>
+                        </div>
                     </div>
-                </div>
-                <button id="solveMathBtn" class="action-button">Get My Answer</button>
-            </section>
+                    <button id="solveMathBtn" class="action-button">Get My Answer</button>
+                </section>
 
-            <section class="results-area">
-                <div class="card result-card">
-                    <h2 class="card-title">Precise Solution & Steps</h2>
-                    <div id="mathSolution" class="output-box">
-                        <span class="placeholder">Answer and steps will appear here.</span>
-                    </div>
+                <div class="right-col">
+                    <section class="results-area card">
+                        <div class="card-header">
+                            <h2>Precise Solution</h2>
+                        </div>
+                        <div id="mathSolution" class="output-box">
+                            <div class="empty-state">
+                                <span>Answer and steps will appear here.</span>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section id="graphCard" class="graph-section card">
+                        <div class="card-header">
+                            <h2>Visual Graph</h2>
+                        </div>
+                        <div class="canvas-wrapper">
+                            <canvas id="mathCanvas" width="600" height="400"></canvas>
+                        </div>
+                    </section>
                 </div>
-                
-                <div id="graphCard" class="card graph-card">
-                    <h2 class="card-title">Accurate Graph</h2>
-                    <div class="canvas-wrapper">
-                        <canvas id="mathCanvas" width="600" height="400"></canvas>
-                    </div>
-                </div>
-            </section>
+            </div>
         </div>
 
         <div id="aiView" class="view-section hidden">
             <section class="ai-panel card">
-                <h2 id="aiTitle" class="card-title">Subject Helper</h2>
-                <div id="aiResponse" class="output-box ai-output">
-                    <span class="placeholder">I am ready to help. Ask me anything about this subject.</span>
+                <div class="card-header">
+                    <h2 id="aiTitle">Subject Helper</h2>
+                    <span class="ai-badge">Gemini 1.5 Pro</span>
                 </div>
-                <div class="ai-input-group">
+                
+                <div id="aiResponse" class="output-box ai-output">
+                    <div class="empty-state">
+                        <span>I am ready to help. Ask me anything about this subject.</span>
+                    </div>
+                </div>
+                
+                <div class="ai-input-area">
                     <textarea id="aiPrompt" placeholder="Type your question, essay, or concept here..."></textarea>
-                    <button id="askAiBtn" class="action-button">Ask AI</button>
+                    <button id="askAiBtn" class="action-button ai-send">Ask AI</button>
                 </div>
             </section>
         </div>

@@ -151,8 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
         html += `<span class="step-header">Theorem: Triangle Sum Theorem</span>`;
         html += `The sum of angles in a triangle is always 180°.<br><br>`;
         html += `Formula: x + ${a1} + ${a2} = 180<br>`;
-        html += `Simplify: x + ${a1+a2} = 180<br>`;
-        html += `Solve: x = 180 - ${a1+a2}<br>`;
+        html += `Simplify: x + ${parseFloat((a1+a2).toFixed(2))} = 180<br>`;
+        html += `Solve: x = 180 - ${parseFloat((a1+a2).toFixed(2))}<br>`;
         html += `<hr class="step-line">`;
         html += `<strong>Final Answer: x = ${a3}°</strong>`;
 
@@ -342,15 +342,15 @@ document.addEventListener('DOMContentLoaded', () => {
         aiResponse.innerHTML = '<span style="color:var(--primary)">Thinking...</span>';
 
         let sysPrompt = "You are a helpful tutor.";
-        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be precise, show steps using simple words.";
-        if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature. Be concise.";
-        if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context and dates clearly. Be concise.";
-        if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain concepts clearly. Be concise.";
+        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words.";
+        if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature. Be concise and accurate.";
+        if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately. Be concise.";
+        if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain biology, chemistry, and physics concepts accurately. Be concise.";
 
         const finalPrompt = `${sysPrompt}\n\nStudent Question: ${prompt}`;
 
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             
             const response = await fetch(url, {
                 method: 'POST',

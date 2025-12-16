@@ -1,33 +1,59 @@
 document.addEventListener('DOMContentLoaded', () => {
     const solveBtn = document.getElementById('solveBtn');
     const inputField = document.getElementById('problemInput');
+    const modeSelect = document.getElementById('modeSelect');
     const solutionBox = document.getElementById('solutionBox');
     const canvas = document.getElementById('mathCanvas');
     const ctx = canvas.getContext('2d');
 
     drawGrid();
 
+    modeSelect.addEventListener('change', () => {
+        solutionBox.innerHTML = '<span class="placeholder-text">Results will appear here accurately.</span>';
+        inputField.value = '';
+        drawGrid();
+
+        switch (modeSelect.value) {
+            case 'linear':
+                inputField.placeholder = "Ex: y = 2x + 4 or y = -x - 5";
+                break;
+            case 'intercepts':
+                inputField.placeholder = "Ex: y-intercept is 1 and x-intercept is -6";
+                break;
+            case 'geometry':
+                inputField.placeholder = "Ex: (2, 3) and (5, 7)";
+                break;
+        }
+    });
+
     solveBtn.addEventListener('click', () => {
-        const input = inputField.value.toLowerCase().replace(/\s+/g, '');
+        const input = inputField.value.trim().toLowerCase();
         if (!input) return;
 
         solutionBox.innerHTML = '';
-        
-        if (input.startsWith('y=') || (input.includes('x') && input.includes('y') && input.includes('='))) {
-            solveLinear(input);
-        } else if (input.match(/\(-?\d+(\.\d+)?,-?\d+(\.\d+)?\)/g)) {
-            solveGeometry(input);
-        } else {
-            solutionBox.textContent = "Format not recognized. Try 'y = 2x + 1' or '(1,2) and (4,6)'";
+        const mode = modeSelect.value;
+
+        try {
+            if (mode === 'linear') {
+                solveLinear(input);
+            } else if (mode === 'intercepts') {
+                solveIntercepts(input);
+            } else if (mode === 'geometry') {
+                solveGeometry(input);
+            }
+        } catch (error) {
+            solutionBox.textContent = "Could not solve. Please check your format.";
         }
     });
 
     function solveLinear(eq) {
+        let cleanEq = eq.replace(/\s+/g, '');
         let m = 0;
         let b = 0;
 
         try {
-            const rightSide = eq.split('=')[1];
+            if (!cleanEq.startsWith('y=')) throw new Error();
+            const rightSide = cleanEq.split('=')[1];
             
             if (rightSide.includes('x')) {
                 const parts = rightSide.split('x');
@@ -47,15 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const p1 = { x: 0, y: b };
             const p2 = { x: 1, y: m * 1 + b };
-            const p3 = { x: -1, y: m * -1 + b };
             const xInt = m !== 0 ? -b / m : null;
 
             let output = `Equation: y = ${m}x + ${b}\n\n`;
             output += `PLOTTED POINTS:\n`;
             output += `• Y-Intercept: (0, ${b})\n`;
             output += `• Point at x=1: (1, ${p2.y})\n`;
-            output += `• Point at x=-1: (-1, ${p3.y})\n`;
-            
             if (xInt !== null) {
                 output += `• X-Intercept: (${xInt.toFixed(2)}, 0)\n`;
             }
@@ -67,7 +90,56 @@ document.addEventListener('DOMContentLoaded', () => {
             if (xInt !== null) drawDot(xInt, 0, "blue");
 
         } catch (e) {
-            solutionBox.textContent = "Could not parse equation. Ensure it is in y = mx + b format.";
+            solutionBox.textContent = "Format Error: Please use format 'y = mx + b'";
+        }
+    }
+
+    function solveIntercepts(input) {
+        const xMatch = input.match(/x.*?(-?\d+\.?\d*)/);
+        const yMatch = input.match(/y.*?(-?\d+\.?\d*)/);
+
+        if (xMatch && yMatch) {
+            const xInt = parseFloat(xMatch[1]);
+            const yInt = parseFloat(yMatch[1]);
+
+            let m = 0;
+            let equation = "";
+
+            if (xInt === 0 && yInt === 0) {
+                 m = 1; 
+                 equation = "y = x (Passes through origin, slope ambiguous without point)";
+            } else {
+                m = (yInt - 0) / (0 - xInt); 
+                equation = `y = ${m.toFixed(2)}x + ${yInt}`;
+            }
+
+            let output = `Given Intercepts:\n`;
+            output += `• X-Intercept: (${xInt}, 0)\n`;
+            output += `• Y-Intercept: (0, ${yInt})\n\n`;
+            output += `CALCULATED LINE:\n`;
+            output += `• Slope (m): ${m.toFixed(2)}\n`;
+            output += `• Equation: ${equation}`;
+
+            solutionBox.textContent = output;
+            drawGrid();
+            
+            drawDot(xInt, 0, "blue");
+            drawDot(0, yInt, "red");
+
+            const xStart = -20;
+            const yStart = m * xStart + yInt;
+            const xEnd = 20;
+            const yEnd = m * xEnd + yInt;
+            
+            ctx.strokeStyle = '#ffb300';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(mapX(xStart), mapY(yStart));
+            ctx.lineTo(mapX(xEnd), mapY(yEnd));
+            ctx.stroke();
+
+        } else {
+            solutionBox.textContent = "Could not find intercepts. Try: 'x-intercept is -6 and y-intercept is 1'";
         }
     }
 
@@ -86,13 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
         const midX = (x1 + x2) / 2;
         const midY = (y1 + y2) / 2;
-        const slope = (x2 - x1) !== 0 ? (y2 - y1) / (x2 - x1) : "Undefined";
 
         let output = `Coordinates: (${x1}, ${y1}) and (${x2}, ${y2})\n\n`;
         output += `RESULTS:\n`;
         output += `• Distance: ${distance.toFixed(4)}\n`;
         output += `• Midpoint: (${midX}, ${midY})\n`;
-        output += `• Slope (m): ${typeof slope === 'number' ? slope.toFixed(4) : slope}`;
 
         solutionBox.textContent = output;
         
@@ -118,18 +188,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function drawGrid() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        ctx.strokeStyle = '#e0e0e0';
-        ctx.lineWidth = 1;
-
         const w = canvas.width;
         const h = canvas.height;
         const scale = 20;
+
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.lineWidth = 1;
+        ctx.fillStyle = '#9e9e9e';
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
 
         for (let x = 0; x <= w; x += scale) {
             ctx.beginPath();
             ctx.moveTo(x, 0);
             ctx.lineTo(x, h);
             ctx.stroke();
+
+            if (x % (scale * 2) === 0) {
+                const graphX = (x - w/2) / scale;
+                if (graphX !== 0) ctx.fillText(graphX, x, h/2 + 15);
+            }
         }
 
         for (let y = 0; y <= h; y += scale) {
@@ -137,9 +216,14 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.moveTo(0, y);
             ctx.lineTo(w, y);
             ctx.stroke();
+
+            if (y % (scale * 2) === 0) {
+                const graphY = (h/2 - y) / scale;
+                if (graphY !== 0) ctx.fillText(graphY, w/2 - 15, y);
+            }
         }
 
-        ctx.strokeStyle = '#000';
+        ctx.strokeStyle = '#424242';
         ctx.lineWidth = 2;
         
         ctx.beginPath();
@@ -151,6 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.moveTo(0, h / 2);
         ctx.lineTo(w, h / 2);
         ctx.stroke();
+        
+        ctx.fillText("0", w/2 - 10, h/2 + 15);
     }
 
     function drawDot(x, y, color) {
@@ -168,9 +254,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineWidth = 3;
         ctx.beginPath();
 
-        const xStart = -15; 
+        const xStart = -20; 
         const yStart = m * xStart + b;
-        const xEnd = 15;
+        const xEnd = 20;
         const yEnd = m * xEnd + b;
 
         ctx.moveTo(mapX(xStart), mapY(yStart));

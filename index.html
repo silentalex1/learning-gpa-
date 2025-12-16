@@ -17,9 +17,18 @@
 
     <main class="container">
         <section class="input-section card">
-            <label for="problemInput" class="input-label">Enter Math Problem</label>
+            <label for="modeSelect" class="input-label">Select Problem Type</label>
+            <div class="select-wrapper">
+                <select id="modeSelect" class="mode-select">
+                    <option value="linear">Linear Equation (y = mx + b)</option>
+                    <option value="intercepts">Find Line by Intercepts</option>
+                    <option value="geometry">Geometry (Distance & Midpoint)</option>
+                </select>
+            </div>
+
+            <label for="problemInput" class="input-label" style="margin-top: 15px;">Enter Math Problem</label>
             <div class="input-wrapper">
-                <input type="text" id="problemInput" placeholder="Ex: y = 2x + 4 or (2, 3) and (5, 7)" autocomplete="off">
+                <input type="text" id="problemInput" placeholder="Ex: y = 2x + 4" autocomplete="off">
             </div>
             <button id="solveBtn" class="solve-button">Get My Answer</button>
         </section>
@@ -33,13 +42,14 @@
             </div>
 
             <div class="tools-section card">
-                <h2 class="section-title">Supported Formats</h2>
-                <ul class="feature-list">
-                    <li>Linear Equations (y = mx + b)</li>
-                    <li>Coordinate Distance</li>
-                    <li>Midpoint Calculation</li>
-                    <li>Slope Calculation</li>
-                </ul>
+                <h2 class="section-title">Mode Guide</h2>
+                <div id="modeGuide">
+                    <ul class="feature-list">
+                        <li><strong>Equation:</strong> Type "y = -x - 5"</li>
+                        <li><strong>Intercepts:</strong> Type "x-intercept is -6, y-intercept is 1"</li>
+                        <li><strong>Geometry:</strong> Type "(2,3) and (5,7)"</li>
+                    </ul>
+                </div>
             </div>
         </section>
         

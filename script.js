@@ -6,8 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const graphSection = document.getElementById('graphSection');
     const canvas = document.getElementById('mathCanvas');
     const ctx = canvas.getContext('2d');
+    const degreeBtn = document.getElementById('degreeBtn');
+    const guideList = document.getElementById('guideList');
 
     drawGrid();
+
+    degreeBtn.addEventListener('click', () => {
+        inputField.value += '°';
+        inputField.focus();
+    });
 
     modeSelect.addEventListener('change', () => {
         solutionBox.innerHTML = '<span class="placeholder-text">Results will appear here accurately.</span>';
@@ -15,11 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const mode = modeSelect.value;
         
-        if (mode === 'triangle_exterior') {
+        // Handle Graph Visibility
+        if (mode === 'triangle') {
             graphSection.classList.add('hidden');
         } else {
             graphSection.classList.remove('hidden');
-            drawGrid();
+            setTimeout(drawGrid, 50); // Redraw grid when becoming visible
         }
 
         switch (mode) {
@@ -32,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'geometry':
                 inputField.placeholder = "Ex: (2, 3) and (5, 7)";
                 break;
-            case 'triangle_exterior':
-                inputField.placeholder = "Ex: 35 and 58 (Two opposite interior angles)";
+            case 'triangle':
+                inputField.placeholder = "Ex: 35 and 58";
                 break;
         }
     });
@@ -52,38 +60,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 solveIntercepts(input);
             } else if (mode === 'geometry') {
                 solveGeometry(input);
-            } else if (mode === 'triangle_exterior') {
-                solveTriangleExterior(input);
+            } else if (mode === 'triangle') {
+                solveTriangle(input);
             }
         } catch (error) {
             solutionBox.textContent = "Could not solve. Please check your format.";
         }
     });
 
-    function solveTriangleExterior(input) {
-        const matches = input.match(/-?\d+(\.\d+)?/g);
+    function solveTriangle(input) {
+        // Extract numbers, ignoring text and symbols
+        const matches = input.match(/(\d+(\.\d+)?)/g);
         
         if (!matches || matches.length < 2) {
-            solutionBox.textContent = "Please enter two angles. Example: '35 and 58'";
+            solutionBox.innerHTML = "<strong>Error:</strong> Please provide at least two angles (e.g., 35 and 58).";
             return;
         }
 
-        const angle1 = parseFloat(matches[0]);
-        const angle2 = parseFloat(matches[1]);
+        // Convert to numbers
+        const angles = matches.map(Number);
+        const a1 = angles[0];
+        const a2 = angles[1];
+
+        // Prepare calculations
+        const exteriorX = parseFloat((a1 + a2).toFixed(2));
+        const interiorX = parseFloat((180 - (a1 + a2)).toFixed(2));
+
+        // Generate HTML with Visual Lines
+        let html = `<span class="step-header">INPUTS DETECTED</span>`;
+        html += `Angle A = ${a1}° <br> Angle B = ${a2}°`;
         
-        const x = angle1 + angle2;
+        html += `<hr class="visual-line">`;
+        
+        html += `<span class="step-header">SCENARIO 1: FINDING EXTERIOR ANGLE (x)</span>`;
+        html += `Theorem: Exterior angle = Sum of two opposite interior angles.<br>`;
+        html += `Formula: x = ${a1} + ${a2}<br>`;
+        html += `<strong>Answer: x = ${exteriorX}°</strong>`;
 
-        let output = `Triangle Problem Detected: Find External Angle (x)\n`;
-        output += `------------------------------------------------\n`;
-        output += `Given Remote Interior Angles: ${angle1}° and ${angle2}°\n\n`;
-        output += `Theorem Used: Exterior Angle Theorem\n`;
-        output += `(The exterior angle is equal to the sum of the two opposite interior angles)\n\n`;
-        output += `Calculation: x = ${angle1} + ${angle2}\n`;
-        output += `------------------------------------------------\n`;
-        output += `FINAL ANSWER:\n`;
-        output += `x = ${x}`;
+        html += `<hr class="visual-line">`;
 
-        solutionBox.textContent = output;
+        html += `<span class="step-header">SCENARIO 2: FINDING 3RD INTERIOR ANGLE</span>`;
+        html += `Theorem: Sum of triangle angles = 180°.<br>`;
+        html += `Formula: x = 180 - (${a1} + ${a2})<br>`;
+        if (interiorX > 0) {
+            html += `<strong>Answer: x = ${interiorX}°</strong>`;
+        } else {
+            html += `<strong>Impossible:</strong> Angles sum to more than 180°.`;
+        }
+
+        solutionBox.innerHTML = html;
     }
 
     function solveLinear(eq) {
@@ -111,11 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 b = parseFloat(rightSide);
             }
 
-            const p1 = { x: 0, y: b };
             const p2 = { x: 1, y: m * 1 + b };
             const xInt = m !== 0 ? -b / m : null;
 
-            let output = `Equation: y = ${m}x + ${b}\n\n`;
+            let output = `Equation: y = ${m}x + ${b}\n`;
+            output += `----------------------------------------\n`;
             output += `PLOTTED POINTS:\n`;
             output += `• Y-Intercept: (0, ${b})\n`;
             output += `• Point at x=1: (1, ${p2.y})\n`;
@@ -141,13 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (xMatch && yMatch) {
             const xInt = parseFloat(xMatch[1]);
             const yInt = parseFloat(yMatch[1]);
-
             let m = 0;
             let equation = "";
 
             if (xInt === 0 && yInt === 0) {
                  m = 1; 
-                 equation = "y = x (approx)";
+                 equation = "y = x";
             } else {
                 m = (yInt - 0) / (0 - xInt); 
                 equation = `y = ${m.toFixed(2)}x + ${yInt}`;
@@ -155,28 +179,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let output = `Given Intercepts:\n`;
             output += `• X-Intercept: (${xInt}, 0)\n`;
-            output += `• Y-Intercept: (0, ${yInt})\n\n`;
+            output += `• Y-Intercept: (0, ${yInt})\n`;
+            output += `----------------------------------------\n`;
             output += `CALCULATED LINE:\n`;
             output += `• Slope (m): ${m.toFixed(2)}\n`;
             output += `• Equation: ${equation}`;
 
             solutionBox.textContent = output;
             drawGrid();
-            
             drawDot(xInt, 0, "blue");
             drawDot(0, yInt, "red");
-
-            const xStart = -20;
-            const yStart = m * xStart + yInt;
-            const xEnd = 20;
-            const yEnd = m * xEnd + yInt;
-            
-            ctx.strokeStyle = '#ffb300';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(mapX(xStart), mapY(yStart));
-            ctx.lineTo(mapX(xEnd), mapY(yEnd));
-            ctx.stroke();
+            drawLine(m, yInt);
 
         } else {
             solutionBox.textContent = "Could not find intercepts. Try: 'x-intercept is -6 and y-intercept is 1'";
@@ -199,7 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const midX = (x1 + x2) / 2;
         const midY = (y1 + y2) / 2;
 
-        let output = `Coordinates: (${x1}, ${y1}) and (${x2}, ${y2})\n\n`;
+        let output = `Coordinates: (${x1}, ${y1}) and (${x2}, ${y2})\n`;
+        output += `----------------------------------------\n`;
         output += `RESULTS:\n`;
         output += `• Distance: ${distance.toFixed(4)}\n`;
         output += `• Midpoint: (${midX}, ${midY})\n`;
@@ -265,24 +279,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ctx.strokeStyle = '#424242';
         ctx.lineWidth = 2;
-        
         ctx.beginPath();
         ctx.moveTo(w / 2, 0);
         ctx.lineTo(w / 2, h);
         ctx.stroke();
-
         ctx.beginPath();
         ctx.moveTo(0, h / 2);
         ctx.lineTo(w, h / 2);
         ctx.stroke();
-        
         ctx.fillText("0", w/2 - 10, h/2 + 15);
     }
 
     function drawDot(x, y, color) {
         const cx = mapX(x);
         const cy = mapY(y);
-
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(cx, cy, 5, 0, Math.PI * 2);
@@ -293,12 +303,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.strokeStyle = '#ffb300';
         ctx.lineWidth = 3;
         ctx.beginPath();
-
         const xStart = -20; 
         const yStart = m * xStart + b;
         const xEnd = 20;
         const yEnd = m * xEnd + b;
-
         ctx.moveTo(mapX(xStart), mapY(yStart));
         ctx.lineTo(mapX(xEnd), mapY(yEnd));
         ctx.stroke();

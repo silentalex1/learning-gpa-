@@ -23,20 +23,21 @@
                     <option value="linear">Linear Equation (y = mx + b)</option>
                     <option value="intercepts">Find Line by Intercepts</option>
                     <option value="geometry">Geometry (Distance & Midpoint)</option>
-                    <option value="triangle_exterior">Triangle: Find Exterior Angle (x)</option>
+                    <option value="triangle">Triangle Angles (Find x)</option>
                 </select>
             </div>
 
             <label for="problemInput" class="input-label" style="margin-top: 15px;">Enter Math Problem</label>
-            <div class="input-wrapper">
+            <div class="input-group">
                 <input type="text" id="problemInput" placeholder="Ex: y = 2x + 4" autocomplete="off">
+                <button id="degreeBtn" class="icon-btn" title="Add Degree Symbol">°</button>
             </div>
             <button id="solveBtn" class="solve-button">Get My Answer</button>
         </section>
 
         <section class="results-grid">
             <div class="output-section card">
-                <h2 class="section-title">Precise Solution Console</h2>
+                <h2 class="section-title">Precise Coordinates & Solution</h2>
                 <div id="solutionBox" class="solution-box">
                     <span class="placeholder-text">Results will appear here accurately.</span>
                 </div>
@@ -45,17 +46,17 @@
             <div class="tools-section card">
                 <h2 class="section-title">Mode Guide</h2>
                 <div id="modeGuide">
-                    <ul class="feature-list" id="featureList">
-                        <li><strong>Equation:</strong> Type "y = -x - 5"</li>
-                        <li><strong>Intercepts:</strong> Type "x-int -6, y-int 1"</li>
-                        <li><strong>Geometry:</strong> Type "(2,3) and (5,7)"</li>
-                        <li><strong>Triangle:</strong> Type "35 and 58"</li>
+                    <ul class="feature-list" id="guideList">
+                        <li><strong>Equation:</strong> "y = -x - 5"</li>
+                        <li><strong>Intercepts:</strong> "x-intercept -6, y-intercept 1"</li>
+                        <li><strong>Geometry:</strong> "(2,3) and (5,7)"</li>
+                        <li><strong>Triangle:</strong> "35 and 58"</li>
                     </ul>
                 </div>
             </div>
         </section>
         
-        <section class="graph-section card" id="graphSection">
+        <section id="graphSection" class="graph-section card">
             <h2 class="section-title">Accurate Answer Graph</h2>
             <div class="canvas-container">
                 <canvas id="mathCanvas" width="600" height="400"></canvas>

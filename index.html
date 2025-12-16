@@ -3,38 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning GPA - Coordinate Plotter</title>
+    <title>Learning GPA.</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header class="header">
-        <h1>Learning GPA</h1>
-        <p>Input your graph or geometry problem for precise plot points and coordinate solutions.</p>
+        <div class="header-content">
+            <h1>Learning GPA.</h1>
+            <p>soon to be the best website to help you with your classes such as math get ready to get your grades up :)</p>
+        </div>
     </header>
 
     <main class="container">
         <section class="input-section card">
-            <label for="problemInput" class="input-label">Enter Graph Equation or Geometry Problem</label>
-            <textarea id="problemInput" placeholder="Type your equation (e.g., y = 2x + 1) or geometry problem (e.g., find midpoint of (2,3) and (8,1))"></textarea>
-            <button class="solve-button">Calculate Accurate Solutions</button>
-        </section>
-
-        <section class="geometry-tools-section card">
-            <h2 class="tools-title">Geometry Coordinate Tools</h2>
-            <div class="tool-list">
-                <div class="tool-item">Distance Formula</div>
-                <div class="tool-item">Midpoint Calculation</div>
-                <div class="tool-item">Area by Coordinates</div>
-                <div class="tool-item">Line Slope and Y-Intercept</div>
+            <label for="problemInput" class="input-label">Enter Math Problem</label>
+            <div class="input-wrapper">
+                <input type="text" id="problemInput" placeholder="Ex: y = 2x + 4 or (2, 3) and (5, 7)" autocomplete="off">
             </div>
-            <p class="tool-note">Enter coordinates in the main input box to use these specific tools.</p>
+            <button id="solveBtn" class="solve-button">Get My Answer</button>
         </section>
 
-        <section class="output-section card">
-            <h2 class="output-title">Precise Plot Points & Coordinates</h2>
-            <div id="solutionBox" class="solution-box">
-                <p>Calculated (x, y) points and geometry results will appear here.</p>
+        <section class="results-grid">
+            <div class="output-section card">
+                <h2 class="section-title">Precise Coordinates & Solution</h2>
+                <div id="solutionBox" class="solution-box">
+                    <span class="placeholder-text">Results will appear here accurately.</span>
+                </div>
+            </div>
+
+            <div class="tools-section card">
+                <h2 class="section-title">Supported Formats</h2>
+                <ul class="feature-list">
+                    <li>Linear Equations (y = mx + b)</li>
+                    <li>Coordinate Distance</li>
+                    <li>Midpoint Calculation</li>
+                    <li>Slope Calculation</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section class="graph-section card">
+            <h2 class="section-title">Accurate Answer Graph</h2>
+            <div class="canvas-container">
+                <canvas id="mathCanvas" width="600" height="400"></canvas>
             </div>
         </section>
         

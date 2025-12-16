@@ -88,6 +88,42 @@ body {
     color: var(--text-main);
 }
 
+.select-wrapper {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.select-wrapper::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: var(--primary);
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.mode-select {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: var(--radius);
+    background-color: #f8fafc;
+    color: var(--text-main);
+    appearance: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.mode-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background-color: #fff;
+}
+
 .input-wrapper input {
     width: 100%;
     padding: 1rem;

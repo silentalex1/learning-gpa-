@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputField = document.getElementById('problemInput');
     const modeSelect = document.getElementById('modeSelect');
     const solutionBox = document.getElementById('solutionBox');
+    const graphSection = document.getElementById('graphSection');
     const canvas = document.getElementById('mathCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -11,9 +12,17 @@ document.addEventListener('DOMContentLoaded', () => {
     modeSelect.addEventListener('change', () => {
         solutionBox.innerHTML = '<span class="placeholder-text">Results will appear here accurately.</span>';
         inputField.value = '';
-        drawGrid();
+        
+        const mode = modeSelect.value;
+        
+        if (mode === 'triangle_exterior') {
+            graphSection.classList.add('hidden');
+        } else {
+            graphSection.classList.remove('hidden');
+            drawGrid();
+        }
 
-        switch (modeSelect.value) {
+        switch (mode) {
             case 'linear':
                 inputField.placeholder = "Ex: y = 2x + 4 or y = -x - 5";
                 break;
@@ -22,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'geometry':
                 inputField.placeholder = "Ex: (2, 3) and (5, 7)";
+                break;
+            case 'triangle_exterior':
+                inputField.placeholder = "Ex: 35 and 58 (Two opposite interior angles)";
                 break;
         }
     });
@@ -40,11 +52,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 solveIntercepts(input);
             } else if (mode === 'geometry') {
                 solveGeometry(input);
+            } else if (mode === 'triangle_exterior') {
+                solveTriangleExterior(input);
             }
         } catch (error) {
             solutionBox.textContent = "Could not solve. Please check your format.";
         }
     });
+
+    function solveTriangleExterior(input) {
+        const matches = input.match(/-?\d+(\.\d+)?/g);
+        
+        if (!matches || matches.length < 2) {
+            solutionBox.textContent = "Please enter two angles. Example: '35 and 58'";
+            return;
+        }
+
+        const angle1 = parseFloat(matches[0]);
+        const angle2 = parseFloat(matches[1]);
+        
+        const x = angle1 + angle2;
+
+        let output = `Triangle Problem Detected: Find External Angle (x)\n`;
+        output += `------------------------------------------------\n`;
+        output += `Given Remote Interior Angles: ${angle1}° and ${angle2}°\n\n`;
+        output += `Theorem Used: Exterior Angle Theorem\n`;
+        output += `(The exterior angle is equal to the sum of the two opposite interior angles)\n\n`;
+        output += `Calculation: x = ${angle1} + ${angle2}\n`;
+        output += `------------------------------------------------\n`;
+        output += `FINAL ANSWER:\n`;
+        output += `x = ${x}`;
+
+        solutionBox.textContent = output;
+    }
 
     function solveLinear(eq) {
         let cleanEq = eq.replace(/\s+/g, '');
@@ -107,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (xInt === 0 && yInt === 0) {
                  m = 1; 
-                 equation = "y = x (Passes through origin, slope ambiguous without point)";
+                 equation = "y = x (approx)";
             } else {
                 m = (yInt - 0) / (0 - xInt); 
                 equation = `y = ${m.toFixed(2)}x + ${yInt}`;

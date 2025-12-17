@@ -16,11 +16,11 @@
                 <button id="closeSettingsBtn" class="close-icon">&times;</button>
             </div>
             <div class="modal-body">
-                <p>To get even more accurate answers please enter in your gemini api key below. This is saved locally on your device.</p>
+                <p>To get even more accurate answers please enter in your Eden AI api key below. This is saved locally on your device.</p>
                 <div class="api-input-wrapper">
-                    <input type="password" id="apiKeyInput" placeholder="Paste your key here..." autocomplete="off">
+                    <input type="password" id="apiKeyInput" placeholder="Paste your Eden AI key here..." autocomplete="off">
                 </div>
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="api-link">click here directly to get your api key.</a>
+                <a href="https://app.edenai.run/admin/account/settings" target="_blank" class="api-link">click here directly to get your api key.</a>
                 <button id="saveKeyBtn" class="save-btn">Save Settings</button>
             </div>
         </div>
@@ -83,6 +83,7 @@
                         </div>
                     </div>
                     <button id="solveMathBtn" class="action-button">Get My Answer</button>
+                    <button id="solveMathAiBtn" class="action-button ai-btn">Get my Answer with AI</button>
                 </section>
 
                 <div class="right-col">
@@ -113,7 +114,7 @@
             <section class="ai-panel card">
                 <div class="card-header">
                     <h2 id="aiTitle">Subject Helper</h2>
-                    <span class="ai-badge">Gemini AI</span>
+                    <span class="ai-badge">Eden AI</span>
                 </div>
                 
                 <div id="aiResponse" class="output-box ai-output">

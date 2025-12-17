@@ -111,89 +111,97 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleDiscordClick(btn) {
-        navigator.clipboard.writeText("https://discord.gg/eKC5CgEZbT");
-        const originalText = btn.textContent;
-        btn.textContent = "Copied!";
-        btn.classList.add('copied');
-        showNotification("Discord invite copied to clipboard!");
-        
-        setTimeout(() => {
-            btn.textContent = originalText;
-            btn.classList.remove('copied');
-        }, 2000);
+        if(btn) {
+            navigator.clipboard.writeText("https://discord.gg/eKC5CgEZbT");
+            const originalText = btn.textContent;
+            btn.textContent = "Copied!";
+            btn.classList.add('copied');
+            showNotification("Discord invite copied to clipboard!");
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('copied');
+            }, 2000);
+        }
     }
 
-    discordBtn.addEventListener('click', () => handleDiscordClick(discordBtn));
-    mobileDiscordBtn.addEventListener('click', () => handleDiscordClick(mobileDiscordBtn));
+    if(discordBtn) discordBtn.addEventListener('click', () => handleDiscordClick(discordBtn));
+    if(mobileDiscordBtn) mobileDiscordBtn.addEventListener('click', () => handleDiscordClick(mobileDiscordBtn));
 
     function handleDocsClick() {
         window.location.href = 'document/';
     }
 
-    docsBtn.addEventListener('click', handleDocsClick);
-    mobileDocsBtn.addEventListener('click', handleDocsClick);
+    if(docsBtn) docsBtn.addEventListener('click', handleDocsClick);
+    if(mobileDocsBtn) mobileDocsBtn.addEventListener('click', handleDocsClick);
 
     function openSuggestionModal() {
-        suggestionModal.classList.remove('hidden');
-        closeSidebar();
+        if(suggestionModal) {
+            suggestionModal.classList.remove('hidden');
+            closeSidebar();
+        }
     }
 
-    suggestionBtn.addEventListener('click', openSuggestionModal);
-    mobileSuggestionBtn.addEventListener('click', openSuggestionModal);
-    closeSuggestionBtn.addEventListener('click', () => suggestionModal.classList.add('hidden'));
+    if(suggestionBtn) suggestionBtn.addEventListener('click', openSuggestionModal);
+    if(mobileSuggestionBtn) mobileSuggestionBtn.addEventListener('click', openSuggestionModal);
+    if(closeSuggestionBtn) closeSuggestionBtn.addEventListener('click', () => suggestionModal.classList.add('hidden'));
 
-    suggestionGenre.addEventListener('change', () => {
-        const genre = suggestionGenre.value;
-        if(genre === 'AI Features') {
-            suggestionLabel.textContent = "What AI Features should be changed / added?";
-            suggestionInput.placeholder = "what ai features should i add onto the site?";
-        } else if(genre === 'Website changes') {
-            suggestionLabel.textContent = "What Website changes should be changed / added?";
-            suggestionInput.placeholder = "what should i change of the website design?";
-        } else {
-            suggestionLabel.textContent = "What Geometry changes should be changed / added?";
-            suggestionInput.placeholder = "what should i add onto this website for more geometry questions that will be more supported?";
-        }
-    });
-
-    submitSuggestionBtn.addEventListener('click', async () => {
-        const genre = suggestionGenre.value;
-        const text = suggestionInput.value.trim();
-        
-        if (!text) {
-            alert("Please type a suggestion.");
-            return;
-        }
-
-        const date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        let username = "Guest";
-        
-        if (puter.auth.isSignedIn()) {
-            const user = await puter.auth.getUser();
-            username = user.username;
-        }
-
-        const payload = {
-            embeds: [{
-                title: `${genre} * posted @ ${date}`,
-                description: `* ${text}`,
-                footer: { text: `By ${username}` },
-                color: 5814783
-            }]
-        };
-
-        fetch("https://discord.com/api/webhooks/1450742401827344527/EOCnELh67IQvsrUelvM1zO4Ga_S1IxAb2_OEfsgVvMaRGGg97Xi6LHGI6ZMfy7oqzVzm", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        }).then(() => {
-            showNotification("Suggestion Submitted!");
-            suggestionModal.classList.add('hidden');
-            suggestionInput.value = "";
-        }).catch(() => {
-            alert("Failed to submit.");
+    if(suggestionGenre) {
+        suggestionGenre.addEventListener('change', () => {
+            const genre = suggestionGenre.value;
+            if(genre === 'AI Features') {
+                suggestionLabel.textContent = "What AI Features should be changed / added?";
+                suggestionInput.placeholder = "what ai features should i add onto the site?";
+            } else if(genre === 'Website changes') {
+                suggestionLabel.textContent = "What Website changes should be changed / added?";
+                suggestionInput.placeholder = "what should i change of the website design?";
+            } else {
+                suggestionLabel.textContent = "What Geometry changes should be changed / added?";
+                suggestionInput.placeholder = "what should i add onto this website for more geometry questions that will be more supported?";
+            }
         });
-    });
+    }
+
+    if(submitSuggestionBtn) {
+        submitSuggestionBtn.addEventListener('click', async () => {
+            const genre = suggestionGenre.value;
+            const text = suggestionInput.value.trim();
+            
+            if (!text) {
+                alert("Please type a suggestion.");
+                return;
+            }
+
+            const date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            let username = "Guest";
+            
+            if (puter.auth.isSignedIn()) {
+                const user = await puter.auth.getUser();
+                username = user.username;
+            }
+
+            const payload = {
+                embeds: [{
+                    title: `${genre} * posted @ ${date}`,
+                    description: `* ${text}`,
+                    footer: { text: `By ${username}` },
+                    color: 5814783
+                }]
+            };
+
+            fetch("https://discord.com/api/webhooks/1450742401827344527/EOCnELh67IQvsrUelvM1zO4Ga_S1IxAb2_OEfsgVvMaRGGg97Xi6LHGI6ZMfy7oqzVzm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                showNotification("Suggestion Submitted!");
+                suggestionModal.classList.add('hidden');
+                suggestionInput.value = "";
+            }).catch(() => {
+                alert("Failed to submit.");
+            });
+        });
+    }
 
     async function checkAuth() {
         try {
@@ -456,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return "Please try again after logging in.";
             }
 
-            const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'google/gemini-pro' });
+            const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'google/gemini-1.5-pro' });
             return cleanMathOutput(resp.message.content);
         } catch (e) {
             console.error(e);
@@ -551,11 +559,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function solveLinear(input) {
-        let clean = input.replace(/\s+/g, '').replace('y=', '').toLowerCase();
+        let clean = input.replace(/\s+/g, '').replace('y=', '');
         
         let m = 0, b = 0;
         
-        if (/^x\s*=\s*([+-]?\d*\.?\d*)$/.test(clean)) {
+        if (/^x\s*=\s*([+-]?\d*\.?\d*)$/.test(input.replace(/\s+/g, ''))) {
              throw new Error("This is a vertical line. Slope is undefined.");
         }
 

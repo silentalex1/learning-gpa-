@@ -1,9 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     const goBackBtn = document.getElementById('goBackBtn');
-    const menuItems = document.querySelectorAll('.doc-sidebar li');
+    const menuItems = document.querySelectorAll('.doc-sidebar > ul > li');
     const sections = document.querySelectorAll('.doc-section');
     const nextPageBtn = document.getElementById('nextPageBtn');
+    const mathSubMenu = document.getElementById('mathSubMenu');
 
     let currentIndex = 0;
 
@@ -20,7 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         currentIndex = index;
 
-        // Hide next button on last page
+        const target = menuItems[index].getAttribute('data-target');
+
+        if (target === 'math') {
+            mathSubMenu.classList.remove('hidden');
+            history.pushState({}, "", "/document/math1");
+        } else {
+            mathSubMenu.classList.add('hidden');
+            history.pushState({}, "", "/document");
+        }
+
         if (currentIndex === sections.length - 1) {
             nextPageBtn.style.display = 'none';
         } else {
@@ -29,7 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     menuItems.forEach((item, index) => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', (e) => {
+            if(e.target.closest('.sub-menu')) return;
             showSection(index);
         });
     });

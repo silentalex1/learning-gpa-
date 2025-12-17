@@ -2,19 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Learning GPA.</title>
     <script src="https://js.puter.com/v2/"></script>
     <link rel="stylesheet" href="style.css">
-    <link id="siteIcon" rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link id="dynamicFavicon" rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
 <body class="theme-math">
+
+    <div id="notificationArea" class="notification-container"></div>
 
     <div id="contextMenu" class="context-menu hidden">
         <div class="context-item" id="renameNoteOption">Rename Note</div>
     </div>
 
-    <div id="notificationArea" class="notification-container"></div>
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card suggestion-card">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button id="closeSettingsBtn" class="close-icon">&times;</button>
+            </div>
+            <div class="modal-body suggestion-body">
+                <div class="form-group">
+                    <label class="input-label">Change Website Icon</label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="iconUpload" accept="image/*" class="hidden-file-input">
+                        <label for="iconUpload" class="file-upload-label">
+                            <span id="fileName">Upload Image</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="suggestionModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card suggestion-card">
+            <div class="modal-header">
+                <h2>Feature Suggestion</h2>
+                <button id="closeSuggestionBtn" class="close-icon">&times;</button>
+            </div>
+            <div class="modal-body suggestion-body">
+                <div class="form-group">
+                    <label class="input-label">Select genre:</label>
+                    <div class="custom-select-container">
+                        <div class="custom-select-trigger" id="suggestionGenreTrigger">AI Features</div>
+                        <div class="custom-options hidden" id="suggestionGenreOptions">
+                            <div class="custom-option" data-value="AI Features">AI Features</div>
+                            <div class="custom-option" data-value="Website changes">Website changes</div>
+                            <div class="custom-option" data-value="Geometry changes">Geometry changes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label id="suggestionLabel" class="input-label">What AI Features should be changed / added?</label>
+                    <textarea id="suggestionInput" class="suggestion-textarea" placeholder="Type your suggestion..."></textarea>
+                </div>
+
+                <div class="center-btn-container">
+                    <button id="submitSuggestionBtn" class="save-btn-styled">Submit Suggestion</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="notesModal" class="modal hidden">
         <div class="modal-backdrop"></div>
@@ -32,64 +85,12 @@
                     <input type="text" id="noteTitleInput" class="note-input" placeholder="Title...">
                     
                     <label class="input-label">Save your notes here:</label>
-                    <div id="noteContentInput" class="note-content-area" contenteditable="true" placeholder="Paste or type something..."></div>
+                    <div id="noteContentInput" class="note-content-area" contenteditable="true"></div>
                     
                     <div class="note-actions">
                         <button id="saveNoteBtn" class="save-btn-styled">Save Your Note</button>
                         <button id="deleteNoteBtn" class="delete-btn hidden">Delete</button>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="suggestionModal" class="modal hidden">
-        <div class="modal-backdrop"></div>
-        <div class="modal-card suggestion-card">
-            <div class="modal-header">
-                <h2>Feature Suggestion</h2>
-                <button id="closeSuggestionBtn" class="close-icon">&times;</button>
-            </div>
-            <div class="modal-body suggestion-body">
-                <div class="form-group">
-                    <label class="input-label">Select genre:</label>
-                    <div class="select-wrapper">
-                        <select id="suggestionGenre" class="styled-select">
-                            <option value="AI Features">AI Features</option>
-                            <option value="Website changes">Website changes</option>
-                            <option value="Geometry changes">Geometry changes</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label id="suggestionLabel" class="input-label">What AI Features should be changed / added?</label>
-                    <textarea id="suggestionInput" class="suggestion-textarea" placeholder="Type your suggestion..."></textarea>
-                </div>
-
-                <div class="center-btn-container">
-                    <button id="submitSuggestionBtn" class="save-btn-styled">submit suggestion</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="settingsModal" class="modal hidden">
-        <div class="modal-backdrop"></div>
-        <div class="modal-card settings-card">
-            <div class="modal-header">
-                <h2>Settings</h2>
-                <button id="closeSettingsBtn" class="close-icon">&times;</button>
-            </div>
-            <div class="modal-body settings-body">
-                <div class="form-group">
-                    <label class="input-label">Website Title</label>
-                    <input type="text" id="siteTitleInput" class="styled-input" placeholder="Learning GPA.">
-                </div>
-                <div class="form-group">
-                    <label class="input-label">Website Icon URL</label>
-                    <input type="text" id="siteIconInput" class="styled-input" placeholder="https://example.com/icon.png">
-                    <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Paste an image URL to change the tab icon.</p>
                 </div>
             </div>
         </div>
@@ -105,7 +106,7 @@
                 <button id="notesBtn" class="nav-item-btn hidden">Your Notes</button>
                 <button id="docsBtn" class="nav-item-btn">Docs</button>
                 <button id="suggestionBtn" class="nav-item-btn">Suggestion</button>
-                <button id="settingsBtn" class="nav-item-btn settings-nav-btn">Settings</button>
+                <button id="settingsBtn" class="nav-item-btn icon-only">⚙️</button>
                 <button id="discordBtn" class="nav-item-btn discord-btn">Discord</button>
                 <div id="userInfo" class="user-info hidden"></div>
             </div>
@@ -131,7 +132,7 @@
     <header class="header">
         <div class="header-content">
             <div class="logo-section">
-                <h1 id="mainHeaderTitle">Learning GPA.</h1>
+                <h1>Learning GPA.</h1>
                 <p>able to solve ANY classes of your problem, get that f to a "A" in no time.</p>
             </div>
         </div>
@@ -163,22 +164,26 @@
                     
                     <div class="form-group">
                         <label class="input-label">Select Problem Type</label>
-                        <div class="select-wrapper">
-                            <select id="mathMode" class="styled-select">
-                                <option value="arithmetic">Algebra & Arithmetic (Simplify/Evaluate)</option>
-                                <option value="linear">Linear Equation (y=mx+b)</option>
-                                <option value="intercepts">Line from Intercepts</option>
-                                <option value="geometry">Geometry (2 Points)</option>
-                                <option value="triangle_in">Triangle (Find 3rd Angle)</option>
-                                <option value="triangle_ex">Triangle (Find Exterior Angle)</option>
-                            </select>
+                        
+                        <div class="custom-select-container">
+                            <div class="custom-select-trigger" id="mathModeTrigger">
+                                Algebra & Arithmetic (Simplify/Evaluate)
+                            </div>
+                            <div class="custom-options hidden" id="mathModeOptions">
+                                <div class="custom-option" data-value="algebra">Algebra & Arithmetic (Simplify/Evaluate)</div>
+                                <div class="custom-option" data-value="linear">Linear Equation (y=mx+b)</div>
+                                <div class="custom-option" data-value="intercepts">Line from Intercepts</div>
+                                <div class="custom-option" data-value="geometry">Geometry (2 Points)</div>
+                                <div class="custom-option" data-value="triangle_in">Triangle (Find 3rd Angle)</div>
+                                <div class="custom-option" data-value="triangle_ex">Triangle (Find Exterior Angle)</div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label id="inputLabel" class="input-label">Enter Expression</label>
+                        <label id="inputLabel" class="input-label">Enter Values</label>
                         <div class="input-group">
-                            <input type="text" id="mathInput" placeholder="8(5+v) or 4+2*8" autocomplete="off">
+                            <div id="mathInput" class="math-input-div" contenteditable="true" placeholder="y = -x - 5"></div>
                             <button id="degreeBtn" class="icon-btn" title="Add Degree Symbol">°</button>
                         </div>
                     </div>

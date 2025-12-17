@@ -36,10 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const noteTitleInput = document.getElementById('noteTitleInput');
     const noteContentInput = document.getElementById('noteContentInput');
     const notesTabs = document.getElementById('notesTabs');
+    const contextMenu = document.getElementById('contextMenu');
+    const renameNoteOption = document.getElementById('renameNoteOption');
 
     let currentSubject = 'math';
     let userNotes = [];
     let currentNoteIndex = -1;
+    let rightClickedTabIndex = -1;
 
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -77,29 +80,37 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarOverlay.addEventListener('click', closeSidebar);
 
     async function checkAuth() {
-        if (puter.auth.isSignedIn()) {
-            const user = await puter.auth.getUser();
-            loginBtn.textContent = "Logout";
-            mobileLoginBtn.textContent = "Logout";
-            notesBtn.classList.remove('hidden');
-            mobileNotesBtn.classList.remove('hidden');
-            loadNotes();
-        } else {
-            loginBtn.textContent = "Login";
-            mobileLoginBtn.textContent = "Login";
-            notesBtn.classList.add('hidden');
-            mobileNotesBtn.classList.add('hidden');
+        try {
+            if (puter.auth.isSignedIn()) {
+                const user = await puter.auth.getUser();
+                loginBtn.textContent = "Logout";
+                mobileLoginBtn.textContent = "Logout";
+                notesBtn.classList.remove('hidden');
+                mobileNotesBtn.classList.remove('hidden');
+                loadNotes();
+            } else {
+                loginBtn.textContent = "Login";
+                mobileLoginBtn.textContent = "Login";
+                notesBtn.classList.add('hidden');
+                mobileNotesBtn.classList.add('hidden');
+            }
+        } catch (e) {
+            console.error("Auth check failed. Puter.js might be blocked.", e);
         }
     }
 
     async function handleAuth() {
-        if (puter.auth.isSignedIn()) {
-            await puter.auth.signOut();
-        } else {
-            await puter.auth.signIn();
+        try {
+            if (puter.auth.isSignedIn()) {
+                await puter.auth.signOut();
+            } else {
+                await puter.auth.signIn();
+            }
+            checkAuth();
+            closeSidebar();
+        } catch (e) {
+            alert("Unable to connect to authentication service. Please check your network connection.");
         }
-        checkAuth();
-        closeSidebar();
     }
 
     loginBtn.addEventListener('click', handleAuth);
@@ -117,16 +128,25 @@ document.addEventListener('DOMContentLoaded', () => {
     closeNotesBtn.addEventListener('click', () => notesModal.classList.add('hidden'));
 
     async function loadNotes() {
-        const data = await puter.kv.get('user_notes');
-        if (data) {
-            userNotes = JSON.parse(data);
-        } else {
+        try {
+            const data = await puter.kv.get('user_notes');
+            if (data) {
+                userNotes = JSON.parse(data);
+            } else {
+                userNotes = [];
+            }
+        } catch (e) {
+            console.warn("Could not load notes.");
             userNotes = [];
         }
     }
 
     async function saveNotesToCloud() {
-        await puter.kv.set('user_notes', JSON.stringify(userNotes));
+        try {
+            await puter.kv.set('user_notes', JSON.stringify(userNotes));
+        } catch (e) {
+            console.warn("Could not save notes.");
+        }
     }
 
     function renderTabs() {
@@ -141,10 +161,61 @@ document.addEventListener('DOMContentLoaded', () => {
             const tab = document.createElement('div');
             tab.className = `note-tab ${currentNoteIndex === index ? 'active' : ''}`;
             tab.textContent = note.title || 'Untitled';
+            
             tab.onclick = () => selectNote(index);
+            
+            tab.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                rightClickedTabIndex = index;
+                contextMenu.style.top = `${e.pageY}px`;
+                contextMenu.style.left = `${e.pageX}px`;
+                contextMenu.classList.remove('hidden');
+            });
+
             notesTabs.appendChild(tab);
         });
     }
+
+    document.addEventListener('click', (e) => {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.classList.add('hidden');
+        }
+    });
+
+    renameNoteOption.addEventListener('click', () => {
+        contextMenu.classList.add('hidden');
+        if (rightClickedTabIndex === -1) return;
+        
+        const tabs = notesTabs.querySelectorAll('.note-tab');
+        const targetTab = tabs[rightClickedTabIndex + 1]; 
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = userNotes[rightClickedTabIndex].title;
+        input.className = 'tab-edit-input';
+        
+        targetTab.textContent = '';
+        targetTab.appendChild(input);
+        input.focus();
+
+        const saveRename = async () => {
+            const newTitle = input.value.trim() || 'Untitled';
+            userNotes[rightClickedTabIndex].title = newTitle;
+            if (currentNoteIndex === rightClickedTabIndex) {
+                noteTitleInput.value = newTitle;
+            }
+            await saveNotesToCloud();
+            renderTabs();
+        };
+
+        input.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                await saveRename();
+            }
+        });
+        
+        input.addEventListener('blur', saveRename);
+    });
 
     function selectNote(index) {
         currentNoteIndex = index;
@@ -227,14 +298,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    async function callPuterAI(prompt, systemPrompt) {
-        if (!puter.auth.isSignedIn()) {
-            await puter.auth.signIn();
-            return "Please try again after logging in.";
-        }
+    function cleanMathOutput(text) {
+        return text
+            .replace(/\\\[/g, '') 
+            .replace(/\\\]/g, '')
+            .replace(/\\\(/g, '')
+            .replace(/\\\)/g, '')
+            .replace(/\\circ/g, '°')
+            .replace(/\\times/g, '×')
+            .replace(/\\cdot/g, '•')
+            .replace(/\\pm/g, '±')
+            .replace(/\\sqrt\{([^}]+)\}/g, '√$1')
+            .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1/$2')
+            .replace(/\\le/g, '≤')
+            .replace(/\\ge/g, '≥')
+            .replace(/\\angle/g, '∠')
+            .replace(/\^\{?\\circ\}?/g, '°')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+    }
 
-        const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'openai/gpt-4o' });
-        return resp.message.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    async function callPuterAI(prompt, systemPrompt) {
+        try {
+            if (!puter.auth.isSignedIn()) {
+                await puter.auth.signIn();
+                return "Please try again after logging in.";
+            }
+
+            const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'openai/gpt-4o' });
+            return cleanMathOutput(resp.message.content);
+        } catch (e) {
+            console.error(e);
+            return "Unable to connect to AI. If you are on a school network, this feature may be blocked.";
+        }
     }
 
     solveMathAiBtn.addEventListener('click', async () => {
@@ -247,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
         solutionBox.innerHTML = '<span style="color:var(--primary)">Thinking with AI...</span>';
 
         try {
-            const result = await callPuterAI(input, "You are a Math expert using the o3-mini reasoning. Solve this problem step-by-step accurately.");
+            const result = await callPuterAI(input, "You are a Math expert. Do not use LaTeX blocks like \\[. Use plain text symbols (like °, x, /). Solve step-by-step.");
             solutionBox.innerHTML = result;
         } catch (e) {
             solutionBox.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
@@ -260,8 +356,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         aiResponse.innerHTML = '<span style="color:var(--primary)">Thinking...</span>';
 
-        let sysPrompt = "You are a helpful tutor.";
-        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words.";
+        let sysPrompt = "You are a helpful tutor. Do not use LaTeX. Use simple readable symbols.";
+        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words. No LaTeX code.";
         if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature. Be concise and accurate.";
         if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately. Be concise.";
         if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain biology, chemistry, and physics concepts accurately. Be concise.";

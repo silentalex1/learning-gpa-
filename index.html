@@ -25,13 +25,27 @@
             </div>
             <div class="modal-body suggestion-body">
                 <div class="form-group">
-                    <label class="input-label">Change Website Icon</label>
+                    <label class="input-label">Change Website Title</label>
+                    <input type="text" id="settingsTitleInput" class="styled-input" placeholder="New Title...">
+                </div>
+
+                <div class="form-group">
+                    <label class="input-label">Change Icon via URL</label>
+                    <input type="text" id="settingsIconUrlInput" class="styled-input" placeholder="https://example.com/image.png">
+                </div>
+
+                <div class="form-group">
+                    <label class="input-label">Or Upload Icon</label>
                     <div class="file-upload-wrapper">
                         <input type="file" id="iconUpload" accept="image/*" class="hidden-file-input">
                         <label for="iconUpload" class="file-upload-label">
-                            <span id="fileName">Upload Image</span>
+                            <span id="fileName">Click to Upload Image</span>
                         </label>
                     </div>
+                </div>
+
+                <div class="center-btn-container">
+                    <button id="applySettingsBtn" class="save-btn-styled">Apply Changes</button>
                 </div>
             </div>
         </div>
@@ -229,7 +243,7 @@
                 </div>
                 
                 <div class="ai-input-area">
-                    <textarea id="aiPrompt" placeholder="Type your question, essay, or concept here..."></textarea>
+                    <textarea id="aiPrompt" class="suggestion-textarea" placeholder="Type your question, essay, or concept here..."></textarea>
                     <button id="askAiBtn" class="action-button ai-send">Ask AI</button>
                 </div>
             </section>

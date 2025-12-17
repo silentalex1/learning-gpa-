@@ -16,35 +16,32 @@ document.addEventListener('DOMContentLoaded', () => {
         sections.forEach(s => s.classList.remove('active'));
         menuItems.forEach(m => m.classList.remove('active'));
 
-        sections[index].classList.add('active');
-        menuItems[index].classList.add('active');
-        
-        currentIndex = index;
+        if (index >= 0 && index < sections.length) {
+            sections[index].classList.add('active');
+            menuItems[index].classList.add('active');
+            
+            const target = menuItems[index].getAttribute('data-target');
 
-        const target = menuItems[index].getAttribute('data-target');
+            if (target === 'math') {
+                mathSubMenu.classList.remove('hidden');
+                history.pushState({}, "", "#math1");
+            } else {
+                mathSubMenu.classList.add('hidden');
+                history.pushState({}, "", "#" + target);
+            }
 
-        // Handle Math Submenu visibility and visual underline
-        if (target === 'math') {
-            mathSubMenu.classList.remove('hidden');
-            // This line changes the URL to /document/math1 without reloading
-            // You do NOT need a math1 folder. 
-            history.pushState({}, "", "math1"); 
-        } else {
-            mathSubMenu.classList.add('hidden');
-            // Reset URL to clean state
-            history.pushState({}, "", window.location.pathname.replace('/math1', ''));
-        }
+            currentIndex = index;
 
-        if (currentIndex === sections.length - 1) {
-            nextPageBtn.style.display = 'none';
-        } else {
-            nextPageBtn.style.display = 'inline-block';
+            if (currentIndex === sections.length - 1) {
+                nextPageBtn.style.display = 'none';
+            } else {
+                nextPageBtn.style.display = 'inline-block';
+            }
         }
     }
 
     menuItems.forEach((item, index) => {
         item.addEventListener('click', (e) => {
-            // Prevent clicking sub-menu items from triggering section change
             if(e.target.closest('.sub-menu')) return;
             showSection(index);
         });
@@ -56,5 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
             window.scrollTo(0, 0);
         }
     });
+
+    function handleInitialHash() {
+        const hash = window.location.hash;
+        if (hash === '#math1') {
+            const mathIndex = Array.from(menuItems).findIndex(item => item.getAttribute('data-target') === 'math');
+            if (mathIndex !== -1) showSection(mathIndex);
+        } else if (hash) {
+            const target = hash.substring(1);
+            const index = Array.from(menuItems).findIndex(item => item.getAttribute('data-target') === target);
+            if (index !== -1) showSection(index);
+        }
+    }
+
+    handleInitialHash();
 
 });

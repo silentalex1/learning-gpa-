@@ -207,12 +207,12 @@ body {
     transition: all 0.3s ease;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     letter-spacing: 0.5px;
-    margin-top: 10px;
 }
 
 .ai-btn {
-    background: linear-gradient(135deg, #1e88e5, #1565c0);
-    margin-top: 15px;
+    background: linear-gradient(135deg, #0277bd, #01579b);
+    margin-top: 25px;
+    position: relative;
 }
 
 .action-button:hover { filter: brightness(1.1); transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
@@ -264,4 +264,5 @@ body {
     .header { padding-bottom: 3.5rem; }
     .subject-nav { gap: 12px; }
     .nav-btn { padding: 12px 24px; font-size: 1rem; }
+    .settings-btn { width: 45px; height: 45px; }
 }

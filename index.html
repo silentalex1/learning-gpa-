@@ -6,8 +6,13 @@
     <title>Learning GPA.</title>
     <script src="https://js.puter.com/v2/"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
 <body class="theme-math">
+
+    <div id="contextMenu" class="context-menu hidden">
+        <div class="context-item" id="renameNoteOption">Rename Note</div>
+    </div>
 
     <nav class="navbar">
         <div class="nav-content">
@@ -42,7 +47,9 @@
                 <button id="closeNotesBtn" class="close-icon">&times;</button>
             </div>
             <div class="modal-body notes-body">
-                <div class="notes-tabs" id="notesTabs"></div>
+                <div class="notes-tabs-container">
+                    <div class="notes-tabs" id="notesTabs"></div>
+                </div>
                 <div class="note-editor">
                     <label class="input-label">Enter your note title:</label>
                     <input type="text" id="noteTitleInput" class="note-input" placeholder="Title...">
@@ -51,7 +58,7 @@
                     <textarea id="noteContentInput" class="note-textarea" placeholder="Write something..."></textarea>
                     
                     <div class="note-actions">
-                        <button id="saveNoteBtn" class="save-btn">Save Note</button>
+                        <button id="saveNoteBtn" class="save-btn-styled">Save Your Note</button>
                         <button id="deleteNoteBtn" class="delete-btn hidden">Delete</button>
                     </div>
                 </div>
@@ -75,7 +82,7 @@
                 <span class="emoji">📚</span> English
             </button>
             <button class="nav-btn" data-subject="history">
-                <span class="emoji">📜</span> History
+                <span class="emoji">⚗️</span> History
             </button>
             <button class="nav-btn" data-subject="science">
                 <span class="emoji">🧬</span> Science

@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mathInput = document.getElementById('mathInput');
     const degreeBtn = document.getElementById('degreeBtn');
     const solveBtn = document.getElementById('solveMathBtn');
+    const solveMathAiBtn = document.getElementById('solveMathAiBtn');
     const solutionBox = document.getElementById('mathSolution');
     const graphCard = document.getElementById('graphCard');
     const canvas = document.getElementById('mathCanvas');
@@ -26,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiResponse = document.getElementById('aiResponse');
 
     let currentSubject = 'math';
-    let apiKey = localStorage.getItem('geminiKey') || '';
+    let apiKey = localStorage.getItem('edenKey') || '';
     apiKeyInput.value = apiKey;
 
     navBtns.forEach(btn => {
@@ -57,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveKeyBtn.addEventListener('click', () => {
         const key = apiKeyInput.value.trim();
         if(key) {
-            localStorage.setItem('geminiKey', key);
+            localStorage.setItem('edenKey', key);
             apiKey = key;
             settingsModal.classList.add('hidden');
             alert("Success! Key saved safely.");
@@ -106,6 +107,28 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (mode === 'triangle_ex') solveTriangleExterior(input);
         } catch (e) {
             solutionBox.innerHTML = `<span style="color:red"><strong>Error:</strong> ${e.message}</span>`;
+        }
+    });
+
+    solveMathAiBtn.addEventListener('click', async () => {
+        if (!apiKey) {
+            solutionBox.innerHTML = `<span style="color:red">Please enter your Eden AI API Key in settings first.</span>`;
+            return;
+        }
+
+        const input = mathInput.value.trim();
+        if (!input) {
+            solutionBox.innerHTML = '<span style="color:red">Please type a problem first.</span>';
+            return;
+        }
+
+        solutionBox.innerHTML = '<span style="color:var(--primary)">Connecting to AI...</span>';
+
+        try {
+            const result = await callEdenAI(input, "You are a Math expert. Solve this problem step-by-step accurately.");
+            solutionBox.innerHTML = result;
+        } catch (e) {
+            solutionBox.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
         }
     });
 
@@ -330,9 +353,36 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
     }
 
+    async function callEdenAI(prompt, systemPrompt) {
+        const response = await fetch('https://api.edenai.run/v2/text/chat', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                providers: "openai",
+                text: prompt,
+                chatbot_global_action: systemPrompt,
+                temperature: 0.2,
+                max_tokens: 1000
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.openai && data.openai.status === "success") {
+             return data.openai.generated_text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+        } else if (data.error) {
+            throw new Error(data.error.message || "Unknown API Error");
+        } else {
+             return "No response from AI provider. Please check your key.";
+        }
+    }
+
     askAiBtn.addEventListener('click', async () => {
         if (!apiKey) {
-            aiResponse.innerHTML = `<span style="color:red">Please enter your API Key in settings first.</span>`;
+            aiResponse.innerHTML = `<span style="color:red">Please enter your Eden AI API Key in settings first.</span>`;
             return;
         }
 
@@ -347,33 +397,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately. Be concise.";
         if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain biology, chemistry, and physics concepts accurately. Be concise.";
 
-        const finalPrompt = `${sysPrompt}\n\nStudent Question: ${prompt}`;
-
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-            
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: finalPrompt }] }]
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.error) {
-                throw new Error(data.error.message);
-            }
-
-            const text = data.candidates[0].content.parts[0].text;
-            
-            const formatted = text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n/g, '<br>');
-
-            aiResponse.innerHTML = formatted;
-
+            const result = await callEdenAI(prompt, sysPrompt);
+            aiResponse.innerHTML = result;
         } catch (e) {
             aiResponse.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
         }

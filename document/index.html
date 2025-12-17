@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning GPA - Documentation</title>
+    <link rel="stylesheet" href="document.css">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+</head>
+<body>
+
+    <nav class="doc-nav">
+        <div class="nav-brand">Learning GPA. Docs</div>
+        <button id="goBackBtn" class="nav-btn">Go Back</button>
+    </nav>
+
+    <main class="doc-container">
+        
+        <aside class="doc-sidebar">
+            <ul>
+                <li class="active" data-target="intro">Introduction</li>
+                <li data-target="math" id="mathMenuItem">
+                    Math Tools
+                    <ul class="sub-menu hidden" id="mathSubMenu">
+                        <li class="sub-item-text">learning to use</li>
+                    </ul>
+                </li>
+                <li data-target="ai">AI Helper</li>
+                <li data-target="notes">Note Taking</li>
+                <li data-target="subjects">Other Subjects</li>
+            </ul>
+        </aside>
+
+        <div class="doc-content">
+            
+            <section id="intro" class="doc-section active">
+                <h1>Introduction</h1>
+                <p class="intro-text">
+                    Hello you are probably new to this website and is probably wondering "how do i use this website?", well the documents of the website will teach you <span class="visual-underline">how to use this</span> <a href="/" class="brand-link"><span class="text-green">learning</span><span class="text-blue visual-underline">GPA</span></a> <strong>website.</strong>, so you'll be able to pass your classes in no <span class="visual-underline">time</span>. Anyways go to the next page to find more info.
+                </p>
+            </section>
+
+            <section id="math" class="doc-section hidden">
+                <h1>Math Tools</h1>
+                <div class="tutorial-text">
+                    <p>you see there is a <span class="hover-trigger"><span class="visual-underline">select a problem type</span><img src="dropdownbox.png" class="hover-img" alt="Dropdown Box"></span> once you click that <strong>dropdown</strong> box it will include different <span class="hover-trigger"><span class="visual-underline">math modes</span><img src="mathmodes.png" class="hover-img" alt="Math Modes"></span> <strong>linear equation</strong>, <strong>linear from intercepts</strong>, <strong>Geometry 2</strong>, <strong>Triangle (Find 3rd angle)</strong> anddd <strong>Triangle find exterior angle</strong> these math modes from my website are modes mostly to work with the website of aleks [aleks.com], but depending on what mode you've choose you can solve that problem directly from learning gpa to aleks, you can find graphs, graph point plots, linear from intercepts, and etc. Pretty much enter any equation stated in the format in the typing text box of the <span class="visual-underline">main site</span>, and the website will solve it for you.</p>
+                </div>
+            </section>
+
+            <section id="ai" class="doc-section hidden">
+                <h1>AI Helper</h1>
+                <p>We use AI to explain concepts. The AI can help with:</p>
+                <ul>
+                    <li>Breaking down complex math problems.</li>
+                    <li>Checking grammar for English essays.</li>
+                    <li>Explaining historical events.</li>
+                    <li>clarifying scientific concepts.</li>
+                </ul>
+            </section>
+
+            <section id="notes" class="doc-section hidden">
+                <h1>Note Taking</h1>
+                <p>You can save your study notes directly in the browser.</p>
+                <ol>
+                    <li>Log in using the "Login" button.</li>
+                    <li>Click "Your Notes" to open the editor.</li>
+                    <li>Type your title and content.</li>
+                    <li>Click "Save Your Note".</li>
+                </ol>
+            </section>
+
+            <section id="subjects" class="doc-section hidden">
+                <h1>Other Subjects</h1>
+                <div class="grid">
+                    <div class="card">
+                        <h3>English</h3>
+                        <p>Focus on grammar and literature.</p>
+                    </div>
+                    <div class="card">
+                        <h3>History</h3>
+                        <p>Learn about dates and events.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Science</h3>
+                        <p>Biology and Physics concepts.</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="pagination">
+                <button id="nextPageBtn" class="next-btn">Next Page &rarr;</button>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="document.js"></script>
+</body>
+</html>

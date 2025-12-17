@@ -74,7 +74,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
-    max-width: 700px;
+    max-width: 780px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(15px);
     padding: 10px 20px;
@@ -349,6 +349,7 @@ body {
 .modal.hidden { opacity: 0; pointer-events: none; }
 .modal-backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); }
 .modal-card { position: relative; background: white; width: 90%; max-width: 700px; border-radius: 24px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3); z-index: 1001; overflow: hidden; transform: scale(1); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; max-height: 85vh; }
+.suggestion-card { max-width: 500px; }
 .modal.hidden .modal-card { transform: scale(0.9); }
 .modal-header { background: #fff; padding: 25px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
 .close-icon { background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1; padding: 0; transition: color 0.2s; }
@@ -413,6 +414,18 @@ body {
 .save-btn-styled:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
 .delete-btn { background: #ef5350; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: background 0.3s; }
 .delete-btn:hover { background: #d32f2f; }
+
+.suggestion-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    font-family: inherit;
+    resize: vertical;
+    background: var(--input-bg);
+}
+.suggestion-textarea:focus { border-color: var(--primary); outline: none; }
 
 .context-menu {
     position: absolute;
@@ -500,4 +513,5 @@ body {
     .header h1 { font-size: 2.2rem; }
     .nav-btn.active { transform: none; box-shadow: none; border-color: var(--accent); }
     .nav-btn:hover { transform: none; }
+    .modal-body { padding: 20px; }
 }

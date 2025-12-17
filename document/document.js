@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentIndex = 0;
 
     goBackBtn.addEventListener('click', () => {
-        window.location.href = '/';
+        window.location.href = '../index.html'; 
     });
 
     function showSection(index) {
@@ -23,12 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const target = menuItems[index].getAttribute('data-target');
 
+        // Handle Math Submenu visibility and visual underline
         if (target === 'math') {
             mathSubMenu.classList.remove('hidden');
-            history.pushState({}, "", "/document/math1");
+            // This line changes the URL to /document/math1 without reloading
+            // You do NOT need a math1 folder. 
+            history.pushState({}, "", "math1"); 
         } else {
             mathSubMenu.classList.add('hidden');
-            history.pushState({}, "", "/document");
+            // Reset URL to clean state
+            history.pushState({}, "", window.location.pathname.replace('/math1', ''));
         }
 
         if (currentIndex === sections.length - 1) {
@@ -40,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     menuItems.forEach((item, index) => {
         item.addEventListener('click', (e) => {
+            // Prevent clicking sub-menu items from triggering section change
             if(e.target.closest('.sub-menu')) return;
             showSection(index);
         });

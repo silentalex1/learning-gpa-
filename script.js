@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return "Please try again after logging in.";
             }
 
-            const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'openai/gpt-4o' });
+            const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'google/gemini-pro' });
             return cleanMathOutput(resp.message.content);
         } catch (e) {
             console.error(e);
@@ -551,11 +551,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function solveLinear(input) {
-        let clean = input.replace(/\s+/g, '').replace('y=', '');
+        let clean = input.replace(/\s+/g, '').replace('y=', '').toLowerCase();
         
         let m = 0, b = 0;
         
-        if (/^x\s*=\s*([+-]?\d*\.?\d*)$/.test(input.replace(/\s+/g, ''))) {
+        if (/^x\s*=\s*([+-]?\d*\.?\d*)$/.test(clean)) {
              throw new Error("This is a vertical line. Slope is undefined.");
         }
 

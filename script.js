@@ -354,6 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function callEdenAI(prompt, systemPrompt) {
+        const fullPrompt = `${systemPrompt}\n\nUser Problem: ${prompt}`;
+        
         const response = await fetch('https://api.edenai.run/v2/text/chat', {
             method: 'POST',
             headers: {
@@ -362,9 +364,9 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({
                 providers: "openai",
-                text: prompt,
-                chatbot_global_action: systemPrompt,
-                temperature: 0.2,
+                model: "o3",
+                text: fullPrompt,
+                temperature: 0.7,
                 max_tokens: 1000
             })
         });
@@ -375,6 +377,8 @@ document.addEventListener('DOMContentLoaded', () => {
              return data.openai.generated_text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
         } else if (data.error) {
             throw new Error(data.error.message || "Unknown API Error");
+        } else if (data.openai && data.openai.status === "fail") {
+             throw new Error(data.openai.error.message || "Provider Failed");
         } else {
              return "No response from AI provider. Please check your key.";
         }

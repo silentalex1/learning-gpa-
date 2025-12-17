@@ -83,18 +83,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    mobileMenuBtn.addEventListener('click', () => {
-        mobileSidebar.classList.add('open');
-        sidebarOverlay.classList.add('open');
-    });
-
-    function closeSidebar() {
-        mobileSidebar.classList.remove('open');
-        sidebarOverlay.classList.remove('open');
+    if(mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileSidebar.classList.add('open');
+            sidebarOverlay.classList.add('open');
+        });
     }
 
-    closeSidebarBtn.addEventListener('click', closeSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
+    function closeSidebar() {
+        if(mobileSidebar) mobileSidebar.classList.remove('open');
+        if(sidebarOverlay) sidebarOverlay.classList.remove('open');
+    }
+
+    if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+    if(sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
     function showNotification(message) {
         const notif = document.createElement('div');
@@ -175,10 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             let username = "Guest";
             
-            if (window.puter && puter.auth.isSignedIn()) {
-                const user = await puter.auth.getUser();
-                username = user.username;
-            }
+            try {
+                if (puter.auth.isSignedIn()) {
+                    const user = await puter.auth.getUser();
+                    username = user.username;
+                }
+            } catch (e) {}
 
             const payload = {
                 embeds: [{
@@ -204,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function checkAuth() {
-        if (!window.puter) return;
         try {
             if (puter.auth.isSignedIn()) {
                 if(loginBtn) loginBtn.textContent = "Logout";
@@ -224,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function handleAuth() {
-        if (!window.puter) return;
         try {
             if (puter.auth.isSignedIn()) {
                 await puter.auth.signOut();
@@ -242,8 +244,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if(mobileLoginBtn) mobileLoginBtn.addEventListener('click', handleAuth);
 
     function openNotes() {
-        if (!window.puter || !puter.auth.isSignedIn()) return;
-        notesModal.classList.remove('hidden');
+        if (!puter.auth.isSignedIn()) return;
+        if(notesModal) notesModal.classList.remove('hidden');
         renderTabs();
         closeSidebar();
     }
@@ -268,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadNotes() {
-        if (!window.puter) return;
         try {
             const data = await puter.kv.get('user_notes');
             if (data) {
@@ -282,7 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function saveNotesToCloud() {
-        if (!window.puter) return;
         try {
             await puter.kv.set('user_notes', JSON.stringify(userNotes));
         } catch (e) {
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTabs() {
-        if (!notesTabs) return;
+        if(!notesTabs) return;
         notesTabs.innerHTML = '';
         const newTab = document.createElement('div');
         newTab.className = `note-tab ${currentNoteIndex === -1 ? 'active' : ''}`;
@@ -477,20 +477,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function callPuterAI(prompt, systemPrompt) {
-        if (!window.puter) {
-            return "Puter.js library not loaded. Check internet connection.";
-        }
         try {
             if (!puter.auth.isSignedIn()) {
                 await puter.auth.signIn();
-                return "Please try again after logging in.";
+                if (!puter.auth.isSignedIn()) {
+                    return "Please login to use AI features.";
+                }
             }
 
             const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'google/gemini-1.5-pro' });
-            return cleanMathOutput(resp.message.content);
+            
+            if (resp && resp.message && resp.message.content) {
+                return cleanMathOutput(resp.message.content);
+            } else {
+                return "AI did not return a response.";
+            }
         } catch (e) {
             console.error(e);
-            return "Unable to connect to AI. If you are on a school network, this feature may be blocked.";
+            return "Unable to connect to AI. Please ensure you are logged in and popup blockers are disabled.";
         }
     }
 
@@ -593,19 +597,14 @@ document.addEventListener('DOMContentLoaded', () => {
              throw new Error("This is a vertical line. Slope is undefined.");
         }
 
-        let match = clean.match(/^([+-]?\d*\.?\d*)?x([+-]?\d*\.?\d*)?$/);
+        const match = clean.match(/^([+-]?\d*\.?\d*)?x([+-]?\d*\.?\d*)?$/);
         
-        if (!match) {
-            clean = clean.replace(/\+/g, ' +').replace(/-/g, ' -'); 
-            match = clean.match(/([+-]?\d*\.?\d*)x\s*([+-]?\d*\.?\d*)?/);
-        }
-
         if (match) {
             let mStr = match[1];
             let bStr = match[2];
 
-            if (mStr === undefined || mStr === '' || mStr.trim() === '+') m = 1;
-            else if (mStr.trim() === '-') m = -1;
+            if (mStr === undefined || mStr === '' || mStr === '+') m = 1;
+            else if (mStr === '-') m = -1;
             else m = parseFloat(mStr);
 
             if (bStr === undefined || bStr === '') b = 0;
@@ -616,10 +615,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 m = 0;
                 b = parseFloat(constMatch[1]);
             } else {
-                
-                if (clean.includes('x') && clean.includes('y')) {
-                     throw new Error("Please convert to Slope-Intercept form (y = mx + b) first.");
-                }
                 throw new Error("Format not recognized. Try y=mx+b");
             }
         }

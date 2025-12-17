@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mobileNotesBtn.classList.add('hidden');
             }
         } catch (e) {
-            console.error("Auth check failed. Puter.js might be blocked.", e);
+            console.error("Auth check failed.", e);
         }
     }
 
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkAuth();
             closeSidebar();
         } catch (e) {
-            alert("Unable to connect to authentication service. Please check your network connection.");
+            alert("Authentication Error. Please try again.");
         }
     }
 
@@ -127,6 +127,18 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileNotesBtn.addEventListener('click', openNotes);
     closeNotesBtn.addEventListener('click', () => notesModal.classList.add('hidden'));
 
+    noteContentInput.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text/html') || (e.clipboardData || window.clipboardData).getData('text');
+        
+        const temp = document.createElement('div');
+        temp.innerHTML = text;
+        
+        const plainText = temp.innerText.replace(/\n\s*\n/g, '\n');
+        
+        document.execCommand('insertText', false, plainText);
+    });
+
     async function loadNotes() {
         try {
             const data = await puter.kv.get('user_notes');
@@ -136,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 userNotes = [];
             }
         } catch (e) {
-            console.warn("Could not load notes.");
             userNotes = [];
         }
     }
@@ -145,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await puter.kv.set('user_notes', JSON.stringify(userNotes));
         } catch (e) {
-            console.warn("Could not save notes.");
+            console.warn("Save failed");
         }
     }
 
@@ -221,11 +232,11 @@ document.addEventListener('DOMContentLoaded', () => {
         currentNoteIndex = index;
         if (index === -1) {
             noteTitleInput.value = '';
-            noteContentInput.value = '';
+            noteContentInput.innerHTML = '';
             deleteNoteBtn.classList.add('hidden');
         } else {
             noteTitleInput.value = userNotes[index].title;
-            noteContentInput.value = userNotes[index].content;
+            noteContentInput.innerHTML = userNotes[index].content;
             deleteNoteBtn.classList.remove('hidden');
         }
         renderTabs();
@@ -233,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveNoteBtn.addEventListener('click', async () => {
         const title = noteTitleInput.value.trim() || 'Untitled Note';
-        const content = noteContentInput.value;
+        const content = noteContentInput.innerHTML;
 
         if (currentNoteIndex === -1) {
             userNotes.push({ title, content });
@@ -299,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function cleanMathOutput(text) {
-        return text
+        let cleaned = text
             .replace(/\\\[/g, '') 
             .replace(/\\\]/g, '')
             .replace(/\\\(/g, '')
@@ -309,13 +320,17 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/\\cdot/g, '•')
             .replace(/\\pm/g, '±')
             .replace(/\\sqrt\{([^}]+)\}/g, '√$1')
-            .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1/$2')
             .replace(/\\le/g, '≤')
             .replace(/\\ge/g, '≥')
             .replace(/\\angle/g, '∠')
             .replace(/\^\{?\\circ\}?/g, '°')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\n/g, '<br>');
+
+        cleaned = cleaned.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '<span class="fraction"><span class="numerator">$1</span><span class="denominator">$2</span></span>');
+        cleaned = cleaned.replace(/(\d+)\/(\d+)/g, '<span class="fraction"><span class="numerator">$1</span><span class="denominator">$2</span></span>');
+
+        return cleaned;
     }
 
     async function callPuterAI(prompt, systemPrompt) {
@@ -343,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
         solutionBox.innerHTML = '<span style="color:var(--primary)">Thinking with AI...</span>';
 
         try {
-            const result = await callPuterAI(input, "You are a Math expert. Do not use LaTeX blocks like \\[. Use plain text symbols (like °, x, /). Solve step-by-step.");
+            const result = await callPuterAI(input, "You are a Math expert. Use HTML for fractions like <span class='fraction'><span class='numerator'>a</span><span class='denominator'>b</span></span>. Use <sup> for exponents. Do not use LaTeX blocks.");
             solutionBox.innerHTML = result;
         } catch (e) {
             solutionBox.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
@@ -357,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
         aiResponse.innerHTML = '<span style="color:var(--primary)">Thinking...</span>';
 
         let sysPrompt = "You are a helpful tutor. Do not use LaTeX. Use simple readable symbols.";
-        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words. No LaTeX code.";
+        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Use HTML for fractions like <span class='fraction'><span class='numerator'>a</span><span class='denominator'>b</span></span>. Use <sup> for exponents.";
         if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature. Be concise and accurate.";
         if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately. Be concise.";
         if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain biology, chemistry, and physics concepts accurately. Be concise.";

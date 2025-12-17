@@ -16,19 +16,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('mathCanvas');
     const ctx = canvas.getContext('2d');
 
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsModal = document.getElementById('settingsModal');
-    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-    const saveKeyBtn = document.getElementById('saveKeyBtn');
-    const apiKeyInput = document.getElementById('apiKeyInput');
-
     const askAiBtn = document.getElementById('askAiBtn');
     const aiPrompt = document.getElementById('aiPrompt');
     const aiResponse = document.getElementById('aiResponse');
 
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    const loginBtn = document.getElementById('loginBtn');
+    const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+    const notesBtn = document.getElementById('notesBtn');
+    const mobileNotesBtn = document.getElementById('mobileNotesBtn');
+    
+    const notesModal = document.getElementById('notesModal');
+    const closeNotesBtn = document.getElementById('closeNotesBtn');
+    const saveNoteBtn = document.getElementById('saveNoteBtn');
+    const deleteNoteBtn = document.getElementById('deleteNoteBtn');
+    const noteTitleInput = document.getElementById('noteTitleInput');
+    const noteContentInput = document.getElementById('noteContentInput');
+    const notesTabs = document.getElementById('notesTabs');
+
     let currentSubject = 'math';
-    let apiKey = localStorage.getItem('edenKey') || '';
-    apiKeyInput.value = apiKey;
+    let userNotes = [];
+    let currentNoteIndex = -1;
 
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -52,18 +63,124 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
-    closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
-    
-    saveKeyBtn.addEventListener('click', () => {
-        const key = apiKeyInput.value.trim();
-        if(key) {
-            localStorage.setItem('edenKey', key);
-            apiKey = key;
-            settingsModal.classList.add('hidden');
-            alert("Success! Key saved safely.");
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileSidebar.classList.add('open');
+        sidebarOverlay.classList.add('open');
+    });
+
+    function closeSidebar() {
+        mobileSidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
+    }
+
+    closeSidebarBtn.addEventListener('click', closeSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    async function checkAuth() {
+        if (puter.auth.isSignedIn()) {
+            const user = await puter.auth.getUser();
+            loginBtn.textContent = "Logout";
+            mobileLoginBtn.textContent = "Logout";
+            notesBtn.classList.remove('hidden');
+            mobileNotesBtn.classList.remove('hidden');
+            loadNotes();
         } else {
-            alert("Please paste your key first.");
+            loginBtn.textContent = "Login";
+            mobileLoginBtn.textContent = "Login";
+            notesBtn.classList.add('hidden');
+            mobileNotesBtn.classList.add('hidden');
+        }
+    }
+
+    async function handleAuth() {
+        if (puter.auth.isSignedIn()) {
+            await puter.auth.signOut();
+        } else {
+            await puter.auth.signIn();
+        }
+        checkAuth();
+        closeSidebar();
+    }
+
+    loginBtn.addEventListener('click', handleAuth);
+    mobileLoginBtn.addEventListener('click', handleAuth);
+
+    function openNotes() {
+        if (!puter.auth.isSignedIn()) return;
+        notesModal.classList.remove('hidden');
+        renderTabs();
+        closeSidebar();
+    }
+
+    notesBtn.addEventListener('click', openNotes);
+    mobileNotesBtn.addEventListener('click', openNotes);
+    closeNotesBtn.addEventListener('click', () => notesModal.classList.add('hidden'));
+
+    async function loadNotes() {
+        const data = await puter.kv.get('user_notes');
+        if (data) {
+            userNotes = JSON.parse(data);
+        } else {
+            userNotes = [];
+        }
+    }
+
+    async function saveNotesToCloud() {
+        await puter.kv.set('user_notes', JSON.stringify(userNotes));
+    }
+
+    function renderTabs() {
+        notesTabs.innerHTML = '';
+        const newTab = document.createElement('div');
+        newTab.className = `note-tab ${currentNoteIndex === -1 ? 'active' : ''}`;
+        newTab.textContent = '+ New Note';
+        newTab.onclick = () => selectNote(-1);
+        notesTabs.appendChild(newTab);
+
+        userNotes.forEach((note, index) => {
+            const tab = document.createElement('div');
+            tab.className = `note-tab ${currentNoteIndex === index ? 'active' : ''}`;
+            tab.textContent = note.title || 'Untitled';
+            tab.onclick = () => selectNote(index);
+            notesTabs.appendChild(tab);
+        });
+    }
+
+    function selectNote(index) {
+        currentNoteIndex = index;
+        if (index === -1) {
+            noteTitleInput.value = '';
+            noteContentInput.value = '';
+            deleteNoteBtn.classList.add('hidden');
+        } else {
+            noteTitleInput.value = userNotes[index].title;
+            noteContentInput.value = userNotes[index].content;
+            deleteNoteBtn.classList.remove('hidden');
+        }
+        renderTabs();
+    }
+
+    saveNoteBtn.addEventListener('click', async () => {
+        const title = noteTitleInput.value.trim() || 'Untitled Note';
+        const content = noteContentInput.value;
+
+        if (currentNoteIndex === -1) {
+            userNotes.push({ title, content });
+            currentNoteIndex = userNotes.length - 1;
+        } else {
+            userNotes[currentNoteIndex] = { title, content };
+        }
+        
+        await saveNotesToCloud();
+        renderTabs();
+    });
+
+    deleteNoteBtn.addEventListener('click', async () => {
+        if (currentNoteIndex > -1) {
+            userNotes.splice(currentNoteIndex, 1);
+            currentNoteIndex = -1;
+            selectNote(-1);
+            await saveNotesToCloud();
         }
     });
 
@@ -110,25 +227,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    solveMathAiBtn.addEventListener('click', async () => {
-        if (!apiKey) {
-            solutionBox.innerHTML = `<span style="color:red">Please enter your Eden AI API Key in settings first.</span>`;
-            return;
+    async function callPuterAI(prompt, systemPrompt) {
+        if (!puter.auth.isSignedIn()) {
+            await puter.auth.signIn();
+            return "Please try again after logging in.";
         }
 
+        const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'openai/gpt-4o' });
+        return resp.message.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    }
+
+    solveMathAiBtn.addEventListener('click', async () => {
         const input = mathInput.value.trim();
         if (!input) {
             solutionBox.innerHTML = '<span style="color:red">Please type a problem first.</span>';
             return;
         }
 
-        solutionBox.innerHTML = '<span style="color:var(--primary)">Connecting to AI...</span>';
+        solutionBox.innerHTML = '<span style="color:var(--primary)">Thinking with AI...</span>';
 
         try {
-            const result = await callEdenAI(input, "You are a Math expert. Solve this problem step-by-step accurately.");
+            const result = await callPuterAI(input, "You are a Math expert using the o3-mini reasoning. Solve this problem step-by-step accurately.");
             solutionBox.innerHTML = result;
         } catch (e) {
             solutionBox.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+        }
+    });
+
+    askAiBtn.addEventListener('click', async () => {
+        const prompt = aiPrompt.value.trim();
+        if (!prompt) return;
+
+        aiResponse.innerHTML = '<span style="color:var(--primary)">Thinking...</span>';
+
+        let sysPrompt = "You are a helpful tutor.";
+        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words.";
+        if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature. Be concise and accurate.";
+        if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately. Be concise.";
+        if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain biology, chemistry, and physics concepts accurately. Be concise.";
+
+        try {
+            const result = await callPuterAI(prompt, sysPrompt);
+            aiResponse.innerHTML = result;
+        } catch (e) {
+            aiResponse.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
         }
     });
 
@@ -353,60 +495,5 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
     }
 
-    async function callEdenAI(prompt, systemPrompt) {
-        const fullPrompt = `${systemPrompt}\n\nUser Problem: ${prompt}`;
-        
-        const response = await fetch('https://api.edenai.run/v2/text/chat', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                providers: "openai",
-                model: "o3",
-                text: fullPrompt,
-                temperature: 0.7,
-                max_tokens: 1000
-            })
-        });
-
-        const data = await response.json();
-        
-        if (data.openai && data.openai.status === "success") {
-             return data.openai.generated_text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-        } else if (data.error) {
-            throw new Error(data.error.message || "Unknown API Error");
-        } else if (data.openai && data.openai.status === "fail") {
-             throw new Error(data.openai.error.message || "Provider Failed");
-        } else {
-             return "No response from AI provider. Please check your key.";
-        }
-    }
-
-    askAiBtn.addEventListener('click', async () => {
-        if (!apiKey) {
-            aiResponse.innerHTML = `<span style="color:red">Please enter your Eden AI API Key in settings first.</span>`;
-            return;
-        }
-
-        const prompt = aiPrompt.value.trim();
-        if (!prompt) return;
-
-        aiResponse.innerHTML = '<span style="color:var(--primary)">Thinking...</span>';
-
-        let sysPrompt = "You are a helpful tutor.";
-        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words.";
-        if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature. Be concise and accurate.";
-        if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately. Be concise.";
-        if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain biology, chemistry, and physics concepts accurately. Be concise.";
-
-        try {
-            const result = await callEdenAI(prompt, sysPrompt);
-            aiResponse.innerHTML = result;
-        } catch (e) {
-            aiResponse.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
-        }
-    });
-
+    checkAuth();
 });

@@ -53,6 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeSettingsBtn = document.getElementById('closeSettingsBtn');
     const iconUpload = document.getElementById('iconUpload');
     const fileNameDisplay = document.getElementById('fileName');
+    const settingsTitleInput = document.getElementById('settingsTitleInput');
+    const settingsIconUrlInput = document.getElementById('settingsIconUrlInput');
+    const applySettingsBtn = document.getElementById('applySettingsBtn');
 
     const notesModal = document.getElementById('notesModal');
     const closeNotesBtn = document.getElementById('closeNotesBtn');
@@ -185,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 mathInput.innerHTML = mathInput.innerHTML.replace(fullStr, fracHTML);
                 
-                // Place cursor at end
                 const range = document.createRange();
                 range.selectNodeContents(mathInput);
                 range.collapse(false);
@@ -296,6 +298,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if(mobileSettingsBtn) mobileSettingsBtn.addEventListener('click', openSettings);
     if(closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
 
+    if(applySettingsBtn) {
+        applySettingsBtn.addEventListener('click', () => {
+            if(settingsTitleInput.value.trim()) {
+                document.title = settingsTitleInput.value.trim();
+            }
+            
+            if(settingsIconUrlInput.value.trim()) {
+                const dynamicFavicon = document.getElementById('dynamicFavicon');
+                dynamicFavicon.href = settingsIconUrlInput.value.trim();
+            }
+
+            showNotification("Settings Applied!");
+            settingsModal.classList.add('hidden');
+        });
+    }
+
     if(iconUpload) {
         iconUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -306,7 +324,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const dynamicFavicon = document.getElementById('dynamicFavicon');
                     dynamicFavicon.href = e.target.result;
                     showNotification("Website Icon Changed!");
-                    settingsModal.classList.add('hidden');
                 };
                 reader.readAsDataURL(file);
             }
@@ -577,7 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return "Please try again after logging in.";
             }
 
-            const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'google/gemini-1.5-pro' });
+            const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'gpt-4o-mini' });
             return cleanMathOutput(resp.message.content);
         } catch (e) {
             console.error(e);

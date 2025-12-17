@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (a1 <= 0 || a2 <= 0) throw new Error("Angles must be positive.");
         if (a1 + a2 >= 180) throw new Error("Sum of two angles must be < 180° for a triangle.");
 
-        const exterior = parseFloat((a1 + a2).toFixed(4));
+        const exterior = parseFloat((a1 + a2).toFixed(2));
 
         let html = `<span class="step-header">Given Interior Angles</span>`;
         html += `Angle A = ${a1}°<br>Angle B = ${a2}°`;
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (a1 + a2 >= 180) throw new Error("Sum is too large to form a triangle.");
 
-        const a3 = parseFloat((180 - (a1 + a2)).toFixed(4));
+        const a3 = parseFloat((180 - (a1 + a2)).toFixed(2));
 
         let html = `<span class="step-header">Given Angles</span>`;
         html += `Angle A = ${a1}°<br>Angle B = ${a2}°`;
@@ -151,8 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
         html += `<span class="step-header">Theorem: Triangle Sum Theorem</span>`;
         html += `The sum of angles in a triangle is always 180°.<br><br>`;
         html += `Formula: x + ${a1} + ${a2} = 180<br>`;
-        html += `Simplify: x + ${parseFloat((a1+a2).toFixed(4))} = 180<br>`;
-        html += `Solve: x = 180 - ${parseFloat((a1+a2).toFixed(4))}<br>`;
+        html += `Simplify: x + ${parseFloat((a1+a2).toFixed(2))} = 180<br>`;
+        html += `Solve: x = 180 - ${parseFloat((a1+a2).toFixed(2))}<br>`;
         html += `<hr class="step-line">`;
         html += `<strong>Final Answer: x = ${a3}°</strong>`;
 
@@ -195,12 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
         html += `<span class="step-header">Plotting Steps</span>`;
         html += `1. Start at the Y-intercept: (0, ${b})<br>`;
         html += `2. Use slope ${m} (rise/run) to find the next point.<br>`;
-        html += `   Next Point: (1, ${parseFloat((m*1+b).toFixed(4))})<br>`;
+        html += `   Next Point: (1, ${parseFloat((m*1+b).toFixed(2))})<br>`;
         
         if (xInt !== null) {
             html += `3. Find X-intercept (where y=0):<br>`;
-            html += `   0 = ${m}x + ${b} → ${-b} = ${m}x → x = ${parseFloat(xInt.toFixed(4))}<br>`;
-            html += `   Point: (${parseFloat(xInt.toFixed(4))}, 0)`;
+            html += `   0 = ${m}x + ${b} → ${-b} = ${m}x → x = ${parseFloat(xInt.toFixed(2))}<br>`;
+            html += `   Point: (${parseFloat(xInt.toFixed(2))}, 0)`;
         }
 
         solutionBox.innerHTML = html;
@@ -222,14 +222,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (xInt === 0 && yInt === 0) throw new Error("Intercepts at origin needs more info to graph line.");
 
         const m = (yInt - 0) / (0 - xInt);
-        const eq = `y = ${parseFloat(m.toFixed(4))}x + ${yInt}`;
+        const eq = `y = ${parseFloat(m.toFixed(2))}x + ${yInt}`;
 
         let html = `<span class="step-header">Given Points</span>`;
         html += `X-Intercept: (${xInt}, 0)<br>Y-Intercept: (0, ${yInt})`;
         html += `<hr class="step-line">`;
         html += `<span class="step-header">Find Equation</span>`;
         html += `Slope (m) = (y2 - y1) / (x2 - x1)<br>`;
-        html += `m = (${yInt} - 0) / (0 - ${xInt}) = ${parseFloat(m.toFixed(4))}<br>`;
+        html += `m = (${yInt} - 0) / (0 - ${xInt}) = ${parseFloat(m.toFixed(2))}<br>`;
         html += `<strong>Equation: ${eq}</strong>`;
 
         solutionBox.innerHTML = html;
@@ -254,35 +254,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let m = null, b = null, eq = "";
         let isVertical = false;
-        let isHorizontal = false;
 
         if (x1 === x2) {
             isVertical = true;
             eq = `x = ${x1}`;
-        } else if (y1 === y2) {
-            isHorizontal = true;
-            m = 0;
-            eq = `y = ${y1}`;
         } else {
             m = (y2-y1)/(x2-x1);
             b = y1 - (m * x1);
-            const bSign = b >= 0 ? `+ ${parseFloat(b.toFixed(4))}` : `- ${Math.abs(parseFloat(b.toFixed(4)))}`;
-            eq = `y = ${parseFloat(m.toFixed(4))}x ${bSign}`;
+            eq = `y = ${parseFloat(m.toFixed(2))}x + ${parseFloat(b.toFixed(2))}`;
         }
 
         let html = `<span class="step-header">Points Analyzed</span>`;
         html += `Point A: (${x1}, ${y1})<br>Point B: (${x2}, ${y2})`;
         html += `<hr class="step-line">`;
         html += `<span class="step-header">Calculations</span>`;
-        html += `<strong>Distance:</strong> √[(${x2}-${x1})² + (${y2}-${y1})²] = ${parseFloat(dist.toFixed(4))}<br>`;
+        html += `<strong>Distance:</strong> √[(${x2}-${x1})² + (${y2}-${y1})²] = ${parseFloat(dist.toFixed(2))}<br>`;
         html += `<strong>Midpoint:</strong> (${mx}, ${my})<br>`;
-        
-        if (isVertical) {
-            html += `<strong>Slope:</strong> Undefined (Vertical)<br>`;
-        } else {
-            html += `<strong>Slope:</strong> ${parseFloat(m.toFixed(4))}<br>`;
-        }
-        
+        html += `<strong>Slope:</strong> ${isVertical ? 'Undefined' : parseFloat(m.toFixed(2))}<br>`;
         html += `<strong>Equation:</strong> ${eq}`;
 
         solutionBox.innerHTML = html;
@@ -295,11 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.strokeStyle = '#ffb300'; ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(mapX(x1), 0); ctx.lineTo(mapX(x1), canvas.height);
-            ctx.stroke();
-        } else if (isHorizontal) {
-            ctx.strokeStyle = '#ffb300'; ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(0, mapY(y1)); ctx.lineTo(canvas.width, mapY(y1));
             ctx.stroke();
         } else {
             drawLine(m, b);
@@ -367,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const finalPrompt = `${sysPrompt}\n\nStudent Question: ${prompt}`;
 
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             
             const response = await fetch(url, {
                 method: 'POST',

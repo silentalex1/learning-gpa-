@@ -4,24 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learning GPA.</title>
+    <script src="https://js.puter.com/v2/"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-math">
 
-    <div id="settingsModal" class="modal hidden">
-        <div class="modal-backdrop"></div>
-        <div class="modal-card">
-            <div class="modal-header">
-                <h2>Settings</h2>
-                <button id="closeSettingsBtn" class="close-icon">&times;</button>
+    <nav class="navbar">
+        <div class="nav-content">
+            <button id="mobileMenuBtn" class="mobile-menu-btn">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <div class="nav-links">
+                <button id="loginBtn" class="nav-item-btn">Login</button>
+                <button id="notesBtn" class="nav-item-btn hidden">Your Notes</button>
+                <div id="userInfo" class="user-info hidden"></div>
             </div>
-            <div class="modal-body">
-                <p>To get even more accurate answers please enter in your Eden AI api key below. This is saved locally on your device.</p>
-                <div class="api-input-wrapper">
-                    <input type="password" id="apiKeyInput" placeholder="Paste your Eden AI key here..." autocomplete="off">
+        </div>
+    </nav>
+
+    <div id="mobileSidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="closeSidebarBtn" class="close-icon">&times;</button>
+        </div>
+        <div class="sidebar-content">
+            <button id="mobileLoginBtn" class="sidebar-btn">Login</button>
+            <button id="mobileNotesBtn" class="sidebar-btn hidden">Your Notes</button>
+        </div>
+    </div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <div id="notesModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card notes-card">
+            <div class="modal-header">
+                <h2>Your saved notes</h2>
+                <button id="closeNotesBtn" class="close-icon">&times;</button>
+            </div>
+            <div class="modal-body notes-body">
+                <div class="notes-tabs" id="notesTabs"></div>
+                <div class="note-editor">
+                    <label class="input-label">Enter your note title:</label>
+                    <input type="text" id="noteTitleInput" class="note-input" placeholder="Title...">
+                    
+                    <label class="input-label">Save your notes here:</label>
+                    <textarea id="noteContentInput" class="note-textarea" placeholder="Write something..."></textarea>
+                    
+                    <div class="note-actions">
+                        <button id="saveNoteBtn" class="save-btn">Save Note</button>
+                        <button id="deleteNoteBtn" class="delete-btn hidden">Delete</button>
+                    </div>
                 </div>
-                <a href="https://app.edenai.run/admin/account/settings" target="_blank" class="api-link">click here directly to get your api key.</a>
-                <button id="saveKeyBtn" class="save-btn">Save Settings</button>
             </div>
         </div>
     </div>
@@ -32,9 +65,6 @@
                 <h1>Learning GPA.</h1>
                 <p>able to solve ANY classes of your problem, get that f to a "A" in no time.</p>
             </div>
-            <button id="settingsBtn" class="settings-btn" aria-label="Settings">
-                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            </button>
         </div>
         
         <nav class="subject-nav">
@@ -114,7 +144,7 @@
             <section class="ai-panel card">
                 <div class="card-header">
                     <h2 id="aiTitle">Subject Helper</h2>
-                    <span class="ai-badge">Eden AI</span>
+                    <span class="ai-badge">Puter AI</span>
                 </div>
                 
                 <div id="aiResponse" class="output-box ai-output">

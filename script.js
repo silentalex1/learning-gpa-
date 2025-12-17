@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mobileNotesBtn.classList.add('hidden');
             }
         } catch (e) {
-            console.error("Auth check failed.", e);
+            console.error("Auth check failed", e);
         }
     }
 
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkAuth();
             closeSidebar();
         } catch (e) {
-            alert("Authentication Error. Please try again.");
+            alert("Unable to connect to authentication service.");
         }
     }
 
@@ -129,14 +129,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     noteContentInput.addEventListener('paste', (e) => {
         e.preventDefault();
-        const text = (e.clipboardData || window.clipboardData).getData('text/html') || (e.clipboardData || window.clipboardData).getData('text');
+        let text = (e.clipboardData || window.clipboardData).getData('text/html') || (e.clipboardData || window.clipboardData).getData('text');
         
-        const temp = document.createElement('div');
-        temp.innerHTML = text;
+        let cleanText = text
+            .replace(/<a[^>]*>/g, "") 
+            .replace(/<\/a>/g, "") 
+            .replace(/🔗/g, "")
+            .replace(/(\r\n|\n|\r)/gm, "<br>");
         
-        const plainText = temp.innerText.replace(/\n\s*\n/g, '\n');
-        
-        document.execCommand('insertText', false, plainText);
+        document.execCommand('insertHTML', false, cleanText);
     });
 
     async function loadNotes() {
@@ -178,8 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 rightClickedTabIndex = index;
-                contextMenu.style.top = `${e.pageY}px`;
-                contextMenu.style.left = `${e.pageX}px`;
+                contextMenu.style.top = `${e.clientY}px`;
+                contextMenu.style.left = `${e.clientX}px`;
                 contextMenu.classList.remove('hidden');
             });
 
@@ -327,9 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\n/g, '<br>');
 
-        cleaned = cleaned.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '<span class="fraction"><span class="numerator">$1</span><span class="denominator">$2</span></span>');
-        cleaned = cleaned.replace(/(\d+)\/(\d+)/g, '<span class="fraction"><span class="numerator">$1</span><span class="denominator">$2</span></span>');
-
+        cleaned = cleaned.replace(/(\d+)\/(\d+)/g, '<span class="frac"><span>$1</span><span class="symbol">/</span><span class="bottom">$2</span></span>');
+        
         return cleaned;
     }
 
@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
         solutionBox.innerHTML = '<span style="color:var(--primary)">Thinking with AI...</span>';
 
         try {
-            const result = await callPuterAI(input, "You are a Math expert. Use HTML for fractions like <span class='fraction'><span class='numerator'>a</span><span class='denominator'>b</span></span>. Use <sup> for exponents. Do not use LaTeX blocks.");
+            const result = await callPuterAI(input, "You are a Math expert. Do not use LaTeX blocks like \\[. Use plain text symbols (like °, x, /). Use vertical fractions. Solve step-by-step.");
             solutionBox.innerHTML = result;
         } catch (e) {
             solutionBox.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
         aiResponse.innerHTML = '<span style="color:var(--primary)">Thinking...</span>';
 
         let sysPrompt = "You are a helpful tutor. Do not use LaTeX. Use simple readable symbols.";
-        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Use HTML for fractions like <span class='fraction'><span class='numerator'>a</span><span class='denominator'>b</span></span>. Use <sup> for exponents.";
+        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words. No LaTeX code.";
         if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature. Be concise and accurate.";
         if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately. Be concise.";
         if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain biology, chemistry, and physics concepts accurately. Be concise.";

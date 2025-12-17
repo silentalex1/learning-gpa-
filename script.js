@@ -29,6 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const notesBtn = document.getElementById('notesBtn');
     const mobileNotesBtn = document.getElementById('mobileNotesBtn');
     
+    const discordBtn = document.getElementById('discordBtn');
+    const mobileDiscordBtn = document.getElementById('mobileDiscordBtn');
+    const docsBtn = document.getElementById('docsBtn');
+    const mobileDocsBtn = document.getElementById('mobileDocsBtn');
+
     const notesModal = document.getElementById('notesModal');
     const closeNotesBtn = document.getElementById('closeNotesBtn');
     const saveNoteBtn = document.getElementById('saveNoteBtn');
@@ -38,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const notesTabs = document.getElementById('notesTabs');
     const contextMenu = document.getElementById('contextMenu');
     const renameNoteOption = document.getElementById('renameNoteOption');
+    const notificationArea = document.getElementById('notificationArea');
 
     let currentSubject = 'math';
     let userNotes = [];
@@ -45,25 +51,27 @@ document.addEventListener('DOMContentLoaded', () => {
     let rightClickedTabIndex = -1;
 
     navBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            navBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            const subject = btn.dataset.subject;
-            currentSubject = subject;
-            body.className = `theme-${subject}`;
+        if(btn.dataset.subject) {
+            btn.addEventListener('click', () => {
+                navBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const subject = btn.dataset.subject;
+                currentSubject = subject;
+                body.className = `theme-${subject}`;
 
-            if (subject === 'math') {
-                mathView.classList.remove('hidden');
-                aiView.classList.add('hidden');
-                setTimeout(drawGrid, 10);
-            } else {
-                mathView.classList.add('hidden');
-                aiView.classList.remove('hidden');
-                aiTitle.textContent = subject.charAt(0).toUpperCase() + subject.slice(1) + " Helper";
-                aiResponse.innerHTML = `<div class="empty-state"><span>I am ready to help you with ${subject}.</span></div>`;
-            }
-        });
+                if (subject === 'math') {
+                    mathView.classList.remove('hidden');
+                    aiView.classList.add('hidden');
+                    setTimeout(drawGrid, 10);
+                } else {
+                    mathView.classList.add('hidden');
+                    aiView.classList.remove('hidden');
+                    aiTitle.textContent = subject.charAt(0).toUpperCase() + subject.slice(1) + " Helper";
+                    aiResponse.innerHTML = `<div class="empty-state"><span>I am ready to help you with ${subject}.</span></div>`;
+                }
+            });
+        }
     });
 
     mobileMenuBtn.addEventListener('click', () => {
@@ -79,10 +87,46 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSidebarBtn.addEventListener('click', closeSidebar);
     sidebarOverlay.addEventListener('click', closeSidebar);
 
+    function showNotification(message) {
+        const notif = document.createElement('div');
+        notif.className = 'notification';
+        notif.textContent = message;
+        notificationArea.appendChild(notif);
+        
+        requestAnimationFrame(() => notif.classList.add('show'));
+        
+        setTimeout(() => {
+            notif.classList.remove('show');
+            setTimeout(() => notif.remove(), 400);
+        }, 3000);
+    }
+
+    function handleDiscordClick(btn) {
+        navigator.clipboard.writeText("https://discord.gg/eKC5CgEZbT");
+        const originalText = btn.textContent;
+        btn.textContent = "Copied!";
+        btn.classList.add('copied');
+        showNotification("Discord invite copied to clipboard!");
+        
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.classList.remove('copied');
+        }, 2000);
+    }
+
+    discordBtn.addEventListener('click', () => handleDiscordClick(discordBtn));
+    mobileDiscordBtn.addEventListener('click', () => handleDiscordClick(mobileDiscordBtn));
+
+    function handleDocsClick() {
+        window.location.href = '/document';
+    }
+
+    docsBtn.addEventListener('click', handleDocsClick);
+    mobileDocsBtn.addEventListener('click', handleDocsClick);
+
     async function checkAuth() {
         try {
             if (puter.auth.isSignedIn()) {
-                const user = await puter.auth.getUser();
                 loginBtn.textContent = "Logout";
                 mobileLoginBtn.textContent = "Logout";
                 notesBtn.classList.remove('hidden');
@@ -95,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mobileNotesBtn.classList.add('hidden');
             }
         } catch (e) {
-            console.error("Auth check failed", e);
+            console.error(e);
         }
     }
 
@@ -255,6 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         await saveNotesToCloud();
+        showNotification(`${title} has been saved!`);
         renderTabs();
     });
 
@@ -344,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return cleanMathOutput(resp.message.content);
         } catch (e) {
             console.error(e);
-            return "Unable to connect to AI. If you are on a school network, this feature may be blocked.";
+            return "Unable to connect to AI.";
         }
     }
 
@@ -358,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
         solutionBox.innerHTML = '<span style="color:var(--primary)">Thinking with AI...</span>';
 
         try {
-            const result = await callPuterAI(input, "You are a Math expert. Do not use LaTeX blocks like \\[. Use plain text symbols (like °, x, /). Use vertical fractions. Solve step-by-step.");
+            const result = await callPuterAI(input, "You are a Math expert. Do not use LaTeX blocks. Use simple text symbols and vertical fractions. Solve carefully and confirm the logic.");
             solutionBox.innerHTML = result;
         } catch (e) {
             solutionBox.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
@@ -372,10 +417,10 @@ document.addEventListener('DOMContentLoaded', () => {
         aiResponse.innerHTML = '<span style="color:var(--primary)">Thinking...</span>';
 
         let sysPrompt = "You are a helpful tutor. Do not use LaTeX. Use simple readable symbols.";
-        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words. No LaTeX code.";
-        if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature. Be concise and accurate.";
-        if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately. Be concise.";
-        if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain biology, chemistry, and physics concepts accurately. Be concise.";
+        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words. No LaTeX.";
+        if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature.";
+        if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately.";
+        if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain concepts accurately.";
 
         try {
             const result = await callPuterAI(prompt, sysPrompt);
@@ -401,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         html += `Angle A = ${a1}°<br>Angle B = ${a2}°`;
         html += `<hr class="step-line">`;
         html += `<span class="step-header">Theorem: Exterior Angle Theorem</span>`;
-        html += `The measure of an exterior angle of a triangle is equal to the sum of the measures of its two remote interior angles.<br><br>`;
+        html += `The exterior angle equals the sum of the two opposite interior angles.<br><br>`;
         html += `Formula: x = Angle A + Angle B<br>`;
         html += `Substitution: x = ${a1} + ${a2}<br>`;
         html += `<hr class="step-line">`;

@@ -10,38 +10,11 @@
 </head>
 <body class="theme-math">
 
-    <div id="notificationArea" class="notification-container"></div>
-
     <div id="contextMenu" class="context-menu hidden">
         <div class="context-item" id="renameNoteOption">Rename Note</div>
     </div>
 
-    <div id="notesModal" class="modal hidden">
-        <div class="modal-backdrop"></div>
-        <div class="modal-card notes-card">
-            <div class="modal-header">
-                <h2>Your saved notes</h2>
-                <button id="closeNotesBtn" class="close-icon">&times;</button>
-            </div>
-            <div class="modal-body notes-body">
-                <div class="notes-tabs-container">
-                    <div class="notes-tabs" id="notesTabs"></div>
-                </div>
-                <div class="note-editor">
-                    <label class="input-label">Enter your note title:</label>
-                    <input type="text" id="noteTitleInput" class="note-input" placeholder="Title...">
-                    
-                    <label class="input-label">Save your notes here:</label>
-                    <div id="noteContentInput" class="note-content-area" contenteditable="true" placeholder="Paste or type something..."></div>
-                    
-                    <div class="note-actions">
-                        <button id="saveNoteBtn" class="save-btn-styled">Save Your Note</button>
-                        <button id="deleteNoteBtn" class="delete-btn hidden">Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="notificationArea" class="notification-container"></div>
 
     <nav class="navbar">
         <div class="nav-content">
@@ -71,6 +44,33 @@
         </div>
     </div>
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <div id="notesModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card notes-card">
+            <div class="modal-header">
+                <h2>Your saved notes</h2>
+                <button id="closeNotesBtn" class="close-icon">&times;</button>
+            </div>
+            <div class="modal-body notes-body">
+                <div class="notes-tabs-container">
+                    <div class="notes-tabs" id="notesTabs"></div>
+                </div>
+                <div class="note-editor">
+                    <label class="input-label">Enter your note title:</label>
+                    <input type="text" id="noteTitleInput" class="note-input" placeholder="Title...">
+                    
+                    <label class="input-label">Save your notes here:</label>
+                    <div id="noteContentInput" class="note-content-area" contenteditable="true" placeholder="Paste or type something..."></div>
+                    
+                    <div class="note-actions">
+                        <button id="saveNoteBtn" class="save-btn-styled">Save Your Note</button>
+                        <button id="deleteNoteBtn" class="delete-btn hidden">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <header class="header">
         <div class="header-content">

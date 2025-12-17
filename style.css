@@ -1,502 +1,434 @@
-:root {
-    --primary: #00695c;
-    --primary-dark: #004d40;
-    --accent: #ffab00;
-    --bg-color: #e0f2f1;
-    --card-bg: #ffffff;
-    --text: #263238;
-    --text-light: #546e7a;
-    --border: #eceff1;
-    --radius: 16px;
-    --shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
-    --input-bg: #f8f9fa;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const body = document.body;
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const mathView = document.getElementById('mathView');
+    const aiView = document.getElementById('aiView');
+    const aiTitle = document.getElementById('aiTitle');
+    
+    const mathMode = document.getElementById('mathMode');
+    const mathInput = document.getElementById('mathInput');
+    const degreeBtn = document.getElementById('degreeBtn');
+    const solveBtn = document.getElementById('solveMathBtn');
+    const solveMathAiBtn = document.getElementById('solveMathAiBtn');
+    const solutionBox = document.getElementById('mathSolution');
+    const graphCard = document.getElementById('graphCard');
+    const canvas = document.getElementById('mathCanvas');
+    const ctx = canvas.getContext('2d');
 
-.theme-math {
-    --primary: #00796b;
-    --primary-dark: #004d40;
-    --accent: #ffd740;
-    --bg-color: #e0f7fa;
-    background-color: #e0f7fa;
-    background-image: 
-        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23b2ebf2' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-        linear-gradient(#b2ebf2 1px, transparent 1px), 
-        linear-gradient(90deg, #b2ebf2 1px, transparent 1px);
-    background-size: 60px 60px, 20px 20px, 20px 20px;
-}
+    const askAiBtn = document.getElementById('askAiBtn');
+    const aiPrompt = document.getElementById('aiPrompt');
+    const aiResponse = document.getElementById('aiResponse');
 
-.theme-english {
-    --primary: #5d4037;
-    --primary-dark: #3e2723;
-    --accent: #d7ccc8;
-    --bg-color: #fbe9e7;
-    background-color: #fbe9e7;
-    background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d7ccc8' fill-opacity='0.6'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    background-size: 40px 40px;
-}
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    const loginBtn = document.getElementById('loginBtn');
+    const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+    const notesBtn = document.getElementById('notesBtn');
+    const mobileNotesBtn = document.getElementById('mobileNotesBtn');
+    
+    const discordBtn = document.getElementById('discordBtn');
+    const mobileDiscordBtn = document.getElementById('mobileDiscordBtn');
+    const docsBtn = document.getElementById('docsBtn');
+    const mobileDocsBtn = document.getElementById('mobileDocsBtn');
 
-.theme-history {
-    --primary: #4e342e;
-    --primary-dark: #263238;
-    --accent: #ffcc80;
-    --bg-color: #efebe9;
-    background-color: #efebe9;
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20c0-5.523 4.477-10 10-10v5c-2.76 0-5 2.24-5 5s2.24 5 5 5v5c-5.523 0-10-4.477-10-10zM10 20c0 5.523-4.477 10-10 10v-5c2.76 0 5-2.24 5-5s-2.24-5-5-5V5c5.523 0 10 4.477 10 10zm10-10c0-5.523-4.477-10-10-10h5c0 2.76 2.24 5 5 5s5-2.24 5-5h5c0 5.523-4.477 10-10 10z' fill='%23bcaaa4' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
-    background-size: 50px 50px;
-}
+    const notesModal = document.getElementById('notesModal');
+    const closeNotesBtn = document.getElementById('closeNotesBtn');
+    const saveNoteBtn = document.getElementById('saveNoteBtn');
+    const deleteNoteBtn = document.getElementById('deleteNoteBtn');
+    const noteTitleInput = document.getElementById('noteTitleInput');
+    const noteContentInput = document.getElementById('noteContentInput');
+    const notesTabs = document.getElementById('notesTabs');
+    const contextMenu = document.getElementById('contextMenu');
+    const renameNoteOption = document.getElementById('renameNoteOption');
+    const notificationArea = document.getElementById('notificationArea');
 
-.theme-science {
-    --primary: #1565c0;
-    --primary-dark: #0d47a1;
-    --accent: #4fc3f7;
-    --bg-color: #e3f2fd;
-    --card-bg: #ffffff;
-    --text: #263238;
-    background-color: #e3f2fd;
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2390caf9' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3Cpath d='M30 30c5.523 0 10-4.477 10-10S35.523 10 30 10 20 14.477 20 20s4.477 10 10 10zm0 2c-6.627 0-12-5.373-12-12S23.373 8 30 8s12 5.373 12 12-5.373 12-12 12z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    background-size: 60px 60px;
-}
+    let currentSubject = 'math';
+    let userNotes = [];
+    let currentNoteIndex = -1;
+    let rightClickedTabIndex = -1;
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    navBtns.forEach(btn => {
+        if(btn.dataset.subject) {
+            btn.addEventListener('click', () => {
+                navBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const subject = btn.dataset.subject;
+                currentSubject = subject;
+                body.className = `theme-${subject}`;
 
-body {
-    min-height: 100vh;
-    transition: all 0.5s ease;
-    color: var(--text);
-    background-color: var(--bg-color);
-}
+                if (subject === 'math') {
+                    mathView.classList.remove('hidden');
+                    aiView.classList.add('hidden');
+                    setTimeout(drawGrid, 10);
+                } else {
+                    mathView.classList.add('hidden');
+                    aiView.classList.remove('hidden');
+                    aiTitle.textContent = subject.charAt(0).toUpperCase() + subject.slice(1) + " Helper";
+                    aiResponse.innerHTML = `<div class="empty-state"><span>I am ready to help you with ${subject}.</span></div>`;
+                }
+            });
+        }
+    });
 
-.hidden { display: none !important; }
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileSidebar.classList.add('open');
+        sidebarOverlay.classList.add('open');
+    });
 
-.navbar {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 650px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(15px);
-    padding: 10px 20px;
-    border-radius: 50px;
-    z-index: 100;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border: 1px solid rgba(255,255,255,0.6);
-    display: flex;
-    justify-content: center;
-}
+    function closeSidebar() {
+        mobileSidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
+    }
 
-.nav-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
+    closeSidebarBtn.addEventListener('click', closeSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
 
-.nav-links {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    margin-left: auto;
-}
+    function showNotification(message) {
+        const notif = document.createElement('div');
+        notif.className = 'notification';
+        notif.textContent = message;
+        notificationArea.appendChild(notif);
+        
+        requestAnimationFrame(() => notif.classList.add('show'));
+        
+        setTimeout(() => {
+            notif.classList.remove('show');
+            setTimeout(() => notif.remove(), 400);
+        }, 3000);
+    }
 
-.nav-item-btn {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 9px 20px;
-    border-radius: 25px;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
+    function handleDiscordClick(btn) {
+        navigator.clipboard.writeText("https://discord.gg/eKC5CgEZbT");
+        const originalText = btn.textContent;
+        btn.textContent = "Copied!";
+        btn.classList.add('copied');
+        showNotification("Discord invite copied to clipboard!");
+        
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.classList.remove('copied');
+        }, 2000);
+    }
 
-.discord-btn { background: #5865F2; }
-.discord-btn:hover { background: #4752c4; }
-.discord-btn.copied { background: #43a047; }
+    discordBtn.addEventListener('click', () => handleDiscordClick(discordBtn));
+    mobileDiscordBtn.addEventListener('click', () => handleDiscordClick(mobileDiscordBtn));
 
-.nav-item-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-}
+    function handleDocsClick() {
+        window.location.href = 'document/';
+    }
 
-.mobile-menu-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text);
-    display: none;
-    padding: 5px;
-}
+    docsBtn.addEventListener('click', handleDocsClick);
+    mobileDocsBtn.addEventListener('click', handleDocsClick);
 
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: -300px;
-    width: 300px;
-    height: 100%;
-    background: white;
-    z-index: 200;
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 5px 0 20px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-}
+    async function checkAuth() {
+        try {
+            if (puter.auth.isSignedIn()) {
+                loginBtn.textContent = "Logout";
+                mobileLoginBtn.textContent = "Logout";
+                notesBtn.classList.remove('hidden');
+                mobileNotesBtn.classList.remove('hidden');
+                loadNotes();
+            } else {
+                loginBtn.textContent = "Login";
+                mobileLoginBtn.textContent = "Login";
+                notesBtn.classList.add('hidden');
+                mobileNotesBtn.classList.add('hidden');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
 
-.sidebar.open { left: 0; }
+    async function handleAuth() {
+        try {
+            if (puter.auth.isSignedIn()) {
+                await puter.auth.signOut();
+            } else {
+                await puter.auth.signIn();
+            }
+            checkAuth();
+            closeSidebar();
+        } catch (e) {
+            alert("Unable to connect to authentication service.");
+        }
+    }
 
-.sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 150;
-    display: none;
-    backdrop-filter: blur(3px);
-}
+    loginBtn.addEventListener('click', handleAuth);
+    mobileLoginBtn.addEventListener('click', handleAuth);
 
-.sidebar-overlay.open { display: block; }
+    function openNotes() {
+        if (!puter.auth.isSignedIn()) return;
+        notesModal.classList.remove('hidden');
+        renderTabs();
+        closeSidebar();
+    }
 
-.sidebar-header {
-    padding: 25px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    notesBtn.addEventListener('click', openNotes);
+    mobileNotesBtn.addEventListener('click', openNotes);
+    closeNotesBtn.addEventListener('click', () => notesModal.classList.add('hidden'));
 
-.sidebar-content {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
+    noteContentInput.addEventListener('paste', (e) => {
+        e.preventDefault();
+        let text = (e.clipboardData || window.clipboardData).getData('text/html') || (e.clipboardData || window.clipboardData).getData('text');
+        
+        let cleanText = text
+            .replace(/<a[^>]*>/g, "") 
+            .replace(/<\/a>/g, "") 
+            .replace(/🔗/g, "")
+            .replace(/(\r\n|\n|\r)/gm, "<br>");
+        
+        document.execCommand('insertHTML', false, cleanText);
+    });
 
-.sidebar-btn {
-    background: #f8f9fa;
-    border: 1px solid var(--border);
-    padding: 15px;
-    border-radius: 12px;
-    text-align: left;
-    font-weight: 700;
-    cursor: pointer;
-    color: var(--text);
-    transition: background 0.2s;
-}
+    async function loadNotes() {
+        try {
+            const data = await puter.kv.get('user_notes');
+            if (data) {
+                userNotes = JSON.parse(data);
+            } else {
+                userNotes = [];
+            }
+        } catch (e) {
+            userNotes = [];
+        }
+    }
 
-.sidebar-btn:hover { background: #e0f2f1; color: var(--primary); }
+    async function saveNotesToCloud() {
+        try {
+            await puter.kv.set('user_notes', JSON.stringify(userNotes));
+        } catch (e) {
+            console.warn("Save failed");
+        }
+    }
 
-.header {
-    background: var(--primary);
-    color: white;
-    padding: 6rem 1.5rem 5rem;
-    border-radius: 0 0 50px 50px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.12);
-    margin-bottom: -45px;
-    position: relative;
-    z-index: 10;
-    transition: background 0.5s ease;
-}
+    function renderTabs() {
+        notesTabs.innerHTML = '';
+        const newTab = document.createElement('div');
+        newTab.className = `note-tab ${currentNoteIndex === -1 ? 'active' : ''}`;
+        newTab.textContent = '+ New Note';
+        newTab.onclick = () => selectNote(-1);
+        notesTabs.appendChild(newTab);
 
-.header-content {
-    max-width: 1000px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    text-align: center;
-}
+        userNotes.forEach((note, index) => {
+            const tab = document.createElement('div');
+            tab.className = `note-tab ${currentNoteIndex === index ? 'active' : ''}`;
+            tab.textContent = note.title || 'Untitled';
+            
+            tab.onclick = () => selectNote(index);
+            
+            tab.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                rightClickedTabIndex = index;
+                contextMenu.style.top = `${e.clientY}px`;
+                contextMenu.style.left = `${e.clientX}px`;
+                contextMenu.classList.remove('hidden');
+            });
 
-.logo-section h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
-.logo-section p { opacity: 0.95; font-size: 1.15rem; max-width: 650px; line-height: 1.5; font-weight: 500; }
+            notesTabs.appendChild(tab);
+        });
+    }
 
-.subject-nav {
-    display: flex;
-    justify-content: center;
-    gap: 18px;
-    margin-top: 2.5rem;
-    flex-wrap: wrap;
-}
+    document.addEventListener('click', (e) => {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.classList.add('hidden');
+        }
+    });
 
-.nav-btn {
-    background: var(--card-bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    padding: 14px 30px;
-    border-radius: 100px;
-    font-size: 1.05rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
+    renameNoteOption.addEventListener('click', () => {
+        contextMenu.classList.add('hidden');
+        if (rightClickedTabIndex === -1) return;
+        
+        const tabs = notesTabs.querySelectorAll('.note-tab');
+        const targetTab = tabs[rightClickedTabIndex + 1]; 
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = userNotes[rightClickedTabIndex].title;
+        input.className = 'tab-edit-input';
+        
+        targetTab.textContent = '';
+        targetTab.appendChild(input);
+        input.focus();
 
-.nav-btn .emoji { font-size: 1.4rem; }
-.nav-btn:hover { transform: translateY(-4px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
-.nav-btn.active { background: var(--accent); color: var(--primary-dark); border-color: var(--accent); transform: scale(1.05); }
+        const saveRename = async () => {
+            const newTitle = input.value.trim() || 'Untitled';
+            userNotes[rightClickedTabIndex].title = newTitle;
+            if (currentNoteIndex === rightClickedTabIndex) {
+                noteTitleInput.value = newTitle;
+            }
+            await saveNotesToCloud();
+            renderTabs();
+        };
 
-.container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 20px;
-    position: relative;
-    z-index: 20;
-}
+        input.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                await saveRename();
+            }
+        });
+        
+        input.addEventListener('blur', saveRename);
+    });
 
-.layout-grid {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 30px;
-}
+    function selectNote(index) {
+        currentNoteIndex = index;
+        if (index === -1) {
+            noteTitleInput.value = '';
+            noteContentInput.innerHTML = '';
+            deleteNoteBtn.classList.add('hidden');
+        } else {
+            noteTitleInput.value = userNotes[index].title;
+            noteContentInput.innerHTML = userNotes[index].content;
+            deleteNoteBtn.classList.remove('hidden');
+        }
+        renderTabs();
+    }
 
-.card {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    padding: 35px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+    saveNoteBtn.addEventListener('click', async () => {
+        const title = noteTitleInput.value.trim() || 'Untitled Note';
+        const content = noteContentInput.innerHTML;
 
-.card:hover { transform: translateY(-3px); box-shadow: 0 20px 60px -15px rgba(0,0,0,0.1); }
+        if (currentNoteIndex === -1) {
+            userNotes.push({ title, content });
+            currentNoteIndex = userNotes.length - 1;
+        } else {
+            userNotes[currentNoteIndex] = { title, content };
+        }
+        
+        await saveNotesToCloud();
+        showNotification(`${title} has been saved!`);
+        renderTabs();
+    });
 
-.card-header {
-    border-bottom: 2px solid var(--accent);
-    padding-bottom: 15px;
-    margin-bottom: 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    deleteNoteBtn.addEventListener('click', async () => {
+        if (currentNoteIndex > -1) {
+            userNotes.splice(currentNoteIndex, 1);
+            currentNoteIndex = -1;
+            selectNote(-1);
+            await saveNotesToCloud();
+        }
+    });
 
-.card-header h2 { font-size: 1.35rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
-.ai-badge { font-size: 0.8rem; background: var(--accent); color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; font-weight: 800; letter-spacing: 0.5px; }
+    mathMode.addEventListener('change', () => {
+        solutionBox.innerHTML = '<div class="empty-state"><span>Answer and steps will appear here.</span></div>';
+        mathInput.value = '';
+        const mode = mathMode.value;
 
-.form-group { margin-bottom: 25px; }
-.input-label { display: block; font-weight: 700; margin-bottom: 12px; font-size: 0.95rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+        if (mode.includes('triangle')) {
+            graphCard.classList.add('hidden');
+            mathInput.placeholder = "Ex: 35 and 58";
+        } else {
+            graphCard.classList.remove('hidden');
+            setTimeout(drawGrid, 10);
+            if (mode === 'linear') mathInput.placeholder = "Ex: y = -x - 5";
+            if (mode === 'intercepts') mathInput.placeholder = "Ex: x-intercept 2, y-intercept 3";
+            if (mode === 'geometry') mathInput.placeholder = "Ex: (1,2) and (4,6)";
+        }
+    });
 
-.styled-select, input[type="text"], textarea, input[type="password"] {
-    width: 100%;
-    padding: 18px;
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    background: var(--input-bg);
-    color: var(--text);
-    font-size: 1.05rem;
-    outline: none;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
+    degreeBtn.addEventListener('click', () => {
+        mathInput.value += '°';
+        mathInput.focus();
+    });
 
-.styled-select:focus, input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 5px rgba(0,0,0,0.03); }
+    solveBtn.addEventListener('click', () => {
+        const input = mathInput.value.toLowerCase().trim();
+        const mode = mathMode.value;
+        solutionBox.innerHTML = '';
 
-.input-group { display: flex; gap: 12px; }
-.icon-btn { width: 60px; background: var(--input-bg); border: 2px solid var(--border); border-radius: 14px; font-size: 1.4rem; cursor: pointer; color: var(--text); transition: all 0.2s; }
-.icon-btn:hover { background: var(--border); }
+        if (!input) {
+            solutionBox.innerHTML = '<span style="color:red">Please type a problem first.</span>';
+            return;
+        }
 
-.action-button {
-    width: 100%;
-    padding: 20px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    border: none;
-    border-radius: 16px;
-    font-weight: 800;
-    font-size: 1.15rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    letter-spacing: 0.5px;
-    margin-top: 10px;
-}
+        try {
+            if (mode === 'linear') solveLinear(input);
+            else if (mode === 'intercepts') solveIntercepts(input);
+            else if (mode === 'geometry') solveGeometry(input);
+            else if (mode === 'triangle_in') solveTriangleInterior(input);
+            else if (mode === 'triangle_ex') solveTriangleExterior(input);
+        } catch (e) {
+            solutionBox.innerHTML = `<span style="color:red"><strong>Error:</strong> ${e.message}</span>`;
+        }
+    });
 
-.ai-btn {
-    background: linear-gradient(135deg, #0277bd, #01579b);
-    margin-top: 25px;
-    position: relative;
-}
+    function cleanMathOutput(text) {
+        let cleaned = text
+            .replace(/\\\[/g, '') 
+            .replace(/\\\]/g, '')
+            .replace(/\\\(/g, '')
+            .replace(/\\\)/g, '')
+            .replace(/\\circ/g, '°')
+            .replace(/\\times/g, '×')
+            .replace(/\\cdot/g, '•')
+            .replace(/\\pm/g, '±')
+            .replace(/\\sqrt\{([^}]+)\}/g, '√$1')
+            .replace(/\\le/g, '≤')
+            .replace(/\\ge/g, '≥')
+            .replace(/\\angle/g, '∠')
+            .replace(/\^\{?\\circ\}?/g, '°')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
 
-.action-button:hover { filter: brightness(1.1); transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
-.action-button:active { transform: translateY(0); }
+        cleaned = cleaned.replace(/(\d+)\/(\d+)/g, '<span class="frac"><span>$1</span><span class="symbol">/</span><span class="bottom">$2</span></span>');
+        
+        return cleaned;
+    }
 
-.output-box {
-    background: var(--input-bg);
-    border-radius: 14px;
-    padding: 30px;
-    font-family: 'Consolas', monospace;
-    min-height: 200px;
-    white-space: pre-wrap;
-    line-height: 1.8;
-    color: var(--text);
-    border: 1px solid var(--border);
-    font-size: 1.05rem;
-}
+    async function callPuterAI(prompt, systemPrompt) {
+        try {
+            if (!puter.auth.isSignedIn()) {
+                await puter.auth.signIn();
+                return "Please try again after logging in.";
+            }
 
-.empty-state { display: flex; justify-content: center; align-items: center; height: 100%; min-height: 140px; color: var(--text-light); font-style: italic; font-family: 'Segoe UI', sans-serif; font-weight: 500; }
+            const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'openai/gpt-4o' });
+            return cleanMathOutput(resp.message.content);
+        } catch (e) {
+            console.error(e);
+            return "Unable to connect to AI.";
+        }
+    }
 
-.canvas-wrapper { background: white; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); display: flex; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.03); }
+    solveMathAiBtn.addEventListener('click', async () => {
+        const input = mathInput.value.trim();
+        if (!input) {
+            solutionBox.innerHTML = '<span style="color:red">Please type a problem first.</span>';
+            return;
+        }
 
-.step-header { font-weight: 900; color: var(--primary); display: block; margin-bottom: 10px; font-size: 1.1rem; letter-spacing: 0.5px; }
-.step-line { border: 0; height: 2px; background: var(--border); margin: 25px 0; }
+        solutionBox.innerHTML = '<span style="color:var(--primary)">Thinking with AI...</span>';
 
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 1; transition: opacity 0.3s ease; }
-.modal.hidden { opacity: 0; pointer-events: none; }
-.modal-backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); }
-.modal-card { position: relative; background: white; width: 90%; max-width: 700px; border-radius: 24px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3); z-index: 1001; overflow: hidden; transform: scale(1); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; max-height: 85vh; }
-.modal.hidden .modal-card { transform: scale(0.9); }
-.modal-header { background: #fff; padding: 25px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
-.close-icon { background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1; padding: 0; transition: color 0.2s; }
-.close-icon:hover { color: #333; }
+        try {
+            const result = await callPuterAI(input, "You are a Math expert. Do not use LaTeX blocks like \\[. Use plain text symbols (like °, x, /). Use vertical fractions. Solve step-by-step.");
+            solutionBox.innerHTML = result;
+        } catch (e) {
+            solutionBox.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+        }
+    });
 
-.notes-body { padding: 0; display: flex; flex-direction: column; height: 100%; overflow: hidden; background: #fafafa; }
-.notes-tabs-container { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 15px 20px 0 20px; }
-.notes-tabs {
-    display: flex;
-    overflow-x: auto;
-    gap: 8px;
-    padding-bottom: 0;
-}
-.note-tab {
-    padding: 12px 25px;
-    background: #f1f5f9;
-    border-radius: 12px 12px 0 0;
-    cursor: pointer;
-    font-weight: 600;
-    color: #64748b;
-    font-size: 0.95rem;
-    white-space: nowrap;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-}
-.note-tab.active { background: #fafafa; color: var(--primary); border: 1px solid #e2e8f0; border-bottom: 2px solid #fafafa; position: relative; top: 1px; }
-.note-tab:hover:not(.active) { background: #e2e8f0; }
+    askAiBtn.addEventListener('click', async () => {
+        const prompt = aiPrompt.value.trim();
+        if (!prompt) return;
 
-.note-editor { padding: 30px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
-.note-input { font-weight: 800; font-size: 1.4rem; border: none; background: transparent; padding: 10px 0; color: #333; border-bottom: 2px solid transparent; transition: border 0.3s; }
-.note-input:focus { outline: none; border-bottom: 2px solid var(--primary); }
+        aiResponse.innerHTML = '<span style="color:var(--primary)">Thinking...</span>';
 
-.note-content-area {
-    flex: 1;
-    min-height: 300px;
-    line-height: 1.6;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    padding: 20px;
-    background: white;
-    font-size: 1rem;
-    overflow-y: auto;
-    white-space: pre-wrap;
-}
-.note-content-area:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(0,0,0,0.05); }
+        let sysPrompt = "You are a helpful tutor. Do not use LaTeX. Use simple readable symbols.";
+        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words. No LaTeX.";
+        if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature.";
+        if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately.";
+        if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain concepts accurately.";
 
-.note-actions { display: flex; gap: 15px; margin-top: 10px; }
+        try {
+            const result = await callPuterAI(prompt, sysPrompt);
+            aiResponse.innerHTML = result;
+        } catch (e) {
+            aiResponse.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+        }
+    });
 
-.save-btn-styled {
-    flex: 1;
-    padding: 16px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    cursor: pointer;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    transition: all 0.3s;
-}
-.save-btn-styled:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
-.delete-btn { background: #ef5350; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: background 0.3s; }
-.delete-btn:hover { background: #d32f2f; }
-
-.context-menu {
-    position: absolute;
-    background: white;
-    border: 1px solid #ddd;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    border-radius: 8px;
-    z-index: 2000;
-    min-width: 150px;
-    overflow: hidden;
-}
-.context-item {
-    padding: 10px 15px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #333;
-}
-.context-item:hover { background: #f0f0f0; color: var(--primary); }
-.tab-edit-input {
-    border: none;
-    background: transparent;
-    font-weight: 700;
-    color: var(--primary);
-    width: 80px;
-    outline: none;
-    border-bottom: 1px solid var(--primary);
-}
-
-.notification-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 3000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.notification {
-    background: white;
-    padding: 15px 25px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    border-left: 5px solid var(--primary);
-    font-weight: 600;
-    color: var(--text);
-    opacity: 0;
-    transform: translateX(50px);
-    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-}
-
-.notification.show {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-/* Fraction CSS */
-.frac {
-    display: inline-block;
-    position: relative;
-    vertical-align: middle;
-    letter-spacing: 0.001em;
-    text-align: center;
-}
-.frac > span {
-    display: block;
-    padding: 0.1em;
-}
-.frac span.bottom {
-    border-top: thin solid black;
-}
-.frac span.symbol {
-    display: none;
-}
-
-@media (max-width: 900px) {
-    .layout-grid { grid-template-columns: 1fr; }
-    .header { padding-bottom: 3rem; padding-top: 5rem; }
-    .subject-nav { gap: 10px; }
-    .nav-btn { padding: 10px 20px; font-size: 0.95rem; }
-    .mobile-menu-btn { display: block; }
-    .nav-links { display: none; } 
-    .navbar { justify-content: space-between; top: 10px; width: 95%; max-width: none; }
-    .card { padding: 25px; }
-    .header h1 { font-size: 2.2rem; }
-}
+    function solveTriangleExterior(input) {
+        const nums = input.match(

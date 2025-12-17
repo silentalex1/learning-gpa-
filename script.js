@@ -43,6 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const suggestionInput = document.getElementById('suggestionInput');
     const submitSuggestionBtn = document.getElementById('submitSuggestionBtn');
 
+    const settingsBtn = document.getElementById('settingsBtn');
+    const mobileSettingsBtn = document.getElementById('mobileSettingsBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const siteTitleInput = document.getElementById('siteTitleInput');
+    const siteIconInput = document.getElementById('siteIconInput');
+    const mainHeaderTitle = document.getElementById('mainHeaderTitle');
+    const siteIconLink = document.getElementById('siteIcon');
+
     const notesModal = document.getElementById('notesModal');
     const closeNotesBtn = document.getElementById('closeNotesBtn');
     const saveNoteBtn = document.getElementById('saveNoteBtn');
@@ -83,20 +92,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    if(mobileMenuBtn) {
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileSidebar.classList.add('open');
-            sidebarOverlay.classList.add('open');
-        });
-    }
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileSidebar.classList.add('open');
+        sidebarOverlay.classList.add('open');
+    });
 
     function closeSidebar() {
-        if(mobileSidebar) mobileSidebar.classList.remove('open');
-        if(sidebarOverlay) sidebarOverlay.classList.remove('open');
+        mobileSidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
     }
 
-    if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
-    if(sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+    closeSidebarBtn.addEventListener('click', closeSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
 
     function showNotification(message) {
         const notif = document.createElement('div');
@@ -148,6 +155,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if(mobileSuggestionBtn) mobileSuggestionBtn.addEventListener('click', openSuggestionModal);
     if(closeSuggestionBtn) closeSuggestionBtn.addEventListener('click', () => suggestionModal.classList.add('hidden'));
 
+    function openSettingsModal() {
+        if(settingsModal) {
+            settingsModal.classList.remove('hidden');
+            closeSidebar();
+        }
+    }
+
+    if(settingsBtn) settingsBtn.addEventListener('click', openSettingsModal);
+    if(mobileSettingsBtn) mobileSettingsBtn.addEventListener('click', openSettingsModal);
+    if(closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+    if(siteTitleInput) {
+        siteTitleInput.addEventListener('input', (e) => {
+            const newVal = e.target.value || "Learning GPA.";
+            document.title = newVal;
+            if(mainHeaderTitle) mainHeaderTitle.textContent = newVal;
+        });
+    }
+
+    if(siteIconInput) {
+        siteIconInput.addEventListener('input', (e) => {
+            const newVal = e.target.value;
+            if(newVal && siteIconLink) siteIconLink.href = newVal;
+        });
+    }
+
     if(suggestionGenre) {
         suggestionGenre.addEventListener('change', () => {
             const genre = suggestionGenre.value;
@@ -177,12 +210,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             let username = "Guest";
             
-            try {
-                if (puter.auth.isSignedIn()) {
-                    const user = await puter.auth.getUser();
-                    username = user.username;
-                }
-            } catch (e) {}
+            if (window.puter && puter.auth.isSignedIn()) {
+                const user = await puter.auth.getUser();
+                username = user.username;
+            }
 
             const payload = {
                 embeds: [{
@@ -208,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function checkAuth() {
+        if (!window.puter) return;
         try {
             if (puter.auth.isSignedIn()) {
                 if(loginBtn) loginBtn.textContent = "Logout";
@@ -227,6 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function handleAuth() {
+        if (!window.puter) return;
         try {
             if (puter.auth.isSignedIn()) {
                 await puter.auth.signOut();
@@ -244,8 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if(mobileLoginBtn) mobileLoginBtn.addEventListener('click', handleAuth);
 
     function openNotes() {
-        if (!puter.auth.isSignedIn()) return;
-        if(notesModal) notesModal.classList.remove('hidden');
+        if (!window.puter || !puter.auth.isSignedIn()) return;
+        notesModal.classList.remove('hidden');
         renderTabs();
         closeSidebar();
     }
@@ -270,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadNotes() {
+        if (!window.puter) return;
         try {
             const data = await puter.kv.get('user_notes');
             if (data) {
@@ -283,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function saveNotesToCloud() {
+        if (!window.puter) return;
         try {
             await puter.kv.set('user_notes', JSON.stringify(userNotes));
         } catch (e) {
@@ -291,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTabs() {
-        if(!notesTabs) return;
+        if (!notesTabs) return;
         notesTabs.innerHTML = '';
         const newTab = document.createElement('div');
         newTab.className = `note-tab ${currentNoteIndex === -1 ? 'active' : ''}`;
@@ -413,6 +448,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mode.includes('triangle')) {
                 graphCard.classList.add('hidden');
                 mathInput.placeholder = "Ex: 35 and 58";
+            } else if (mode === 'arithmetic') {
+                graphCard.classList.add('hidden');
+                mathInput.placeholder = "Ex: 8(5+v) or 4+2*8";
             } else {
                 graphCard.classList.remove('hidden');
                 setTimeout(drawGrid, 10);
@@ -442,7 +480,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                if (mode === 'linear') solveLinear(input);
+                if (mode === 'arithmetic') solveArithmetic(input);
+                else if (mode === 'linear') solveLinear(input);
                 else if (mode === 'intercepts') solveIntercepts(input);
                 else if (mode === 'geometry') solveGeometry(input);
                 else if (mode === 'triangle_in') solveTriangleInterior(input);
@@ -451,6 +490,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 solutionBox.innerHTML = `<span style="color:red"><strong>Error:</strong> ${e.message}</span>`;
             }
         });
+    }
+
+    function solveArithmetic(input) {
+        let clean = input.replace(/\s+/g, '');
+        
+        const distMatch = clean.match(/^(\d+)\((\d+)([+\-])([a-z])\)$/i) || clean.match(/^(\d+)\(([a-z])([+\-])(\d+)\)$/i);
+        if (distMatch) {
+            const factor = parseInt(distMatch[1]);
+            const isVarFirst = isNaN(parseInt(distMatch[2]));
+            const numVal = parseInt(isVarFirst ? distMatch[4] : distMatch[2]);
+            const variable = isVarFirst ? distMatch[2] : distMatch[4];
+            const op = distMatch[3];
+            
+            const term1 = factor * numVal;
+            const term2 = factor; 
+            
+            let result = `${term1} ${op} ${term2}${variable}`;
+            if(isVarFirst) result = `${term2}${variable} ${op} ${term1}`;
+            
+            let html = `<span class="step-header">Distributive Property</span>`;
+            html += `Formula: a(b + c) = ab + ac<br>`;
+            html += `Expand: ${factor} × ${numVal} ${op} ${factor} × ${variable}<br>`;
+            html += `<hr class="step-line">`;
+            html += `<strong>Final Answer: ${result}</strong>`;
+            solutionBox.innerHTML = html;
+            return;
+        }
+
+        try {
+            const safeExp = clean.replace(/[^0-9+\-*/().]/g, '');
+            const result = new Function('return ' + safeExp)();
+            
+            let html = `<span class="step-header">Evaluate Expression</span>`;
+            html += `Input: ${input}<br>`;
+            html += `<hr class="step-line">`;
+            html += `<strong>Final Answer: ${result}</strong>`;
+            solutionBox.innerHTML = html;
+        } catch(e) {
+            throw new Error("Invalid arithmetic expression.");
+        }
     }
 
     function cleanMathOutput(text) {
@@ -477,24 +556,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function callPuterAI(prompt, systemPrompt) {
+        if (!window.puter) {
+            return "Puter.js library not loaded. Check internet connection.";
+        }
         try {
             if (!puter.auth.isSignedIn()) {
                 await puter.auth.signIn();
-                if (!puter.auth.isSignedIn()) {
-                    return "Please login to use AI features.";
-                }
+                return "Please try again after logging in.";
             }
 
             const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'google/gemini-1.5-pro' });
-            
-            if (resp && resp.message && resp.message.content) {
-                return cleanMathOutput(resp.message.content);
-            } else {
-                return "AI did not return a response.";
-            }
+            return cleanMathOutput(resp.message.content);
         } catch (e) {
             console.error(e);
-            return "Unable to connect to AI. Please ensure you are logged in and popup blockers are disabled.";
+            if (e.message && e.message.includes("401")) {
+                await puter.auth.signOut();
+                return "Session expired. Please click Login again.";
+            }
+            return "Unable to connect to AI. Please try again.";
         }
     }
 
@@ -597,14 +676,19 @@ document.addEventListener('DOMContentLoaded', () => {
              throw new Error("This is a vertical line. Slope is undefined.");
         }
 
-        const match = clean.match(/^([+-]?\d*\.?\d*)?x([+-]?\d*\.?\d*)?$/);
+        let match = clean.match(/^([+-]?\d*\.?\d*)?x([+-]?\d*\.?\d*)?$/);
         
+        if (!match) {
+            clean = clean.replace(/\+/g, ' +').replace(/-/g, ' -'); 
+            match = clean.match(/([+-]?\d*\.?\d*)x\s*([+-]?\d*\.?\d*)?/);
+        }
+
         if (match) {
             let mStr = match[1];
             let bStr = match[2];
 
-            if (mStr === undefined || mStr === '' || mStr === '+') m = 1;
-            else if (mStr === '-') m = -1;
+            if (mStr === undefined || mStr === '' || mStr.trim() === '+') m = 1;
+            else if (mStr.trim() === '-') m = -1;
             else m = parseFloat(mStr);
 
             if (bStr === undefined || bStr === '') b = 0;

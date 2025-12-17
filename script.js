@@ -1,736 +1,812 @@
-document.addEventListener('DOMContentLoaded', () => {
-    
-    const body = document.body;
-    const navBtns = document.querySelectorAll('.nav-btn');
-    const mathView = document.getElementById('mathView');
-    const aiView = document.getElementById('aiView');
-    const aiTitle = document.getElementById('aiTitle');
-    
-    const mathMode = document.getElementById('mathMode');
-    const mathInput = document.getElementById('mathInput');
-    const degreeBtn = document.getElementById('degreeBtn');
-    const solveBtn = document.getElementById('solveMathBtn');
-    const solveMathAiBtn = document.getElementById('solveMathAiBtn');
-    const solutionBox = document.getElementById('mathSolution');
-    const graphCard = document.getElementById('graphCard');
-    const canvas = document.getElementById('mathCanvas');
-    const ctx = canvas.getContext('2d');
+let audioCtx;
+let tracks = [];
+let savedProjects = [];
+let currentProjectId = null;
+let isPlaying = false;
+let isRecording = false;
+let mediaRecorder;
+let audioChunks = [];
+let animationFrame;
+let activeSources = [];
+let selectedTrackId = null;
+let videoObjectUrl = null;
+let timelineDuration = 15.0;
+let exportInterval;
+let editingProjectId = null;
 
-    const askAiBtn = document.getElementById('askAiBtn');
-    const aiPrompt = document.getElementById('aiPrompt');
-    const aiResponse = document.getElementById('aiResponse');
+const defaultProject = {
+    id: 'lumibeat-00',
+    name: 'Lo-Fi Chill Beat',
+    date: 'Yesterday',
+    type: 'WAV'
+};
+savedProjects.push(defaultProject);
 
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const mobileSidebar = document.getElementById('mobileSidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-    const loginBtn = document.getElementById('loginBtn');
-    const mobileLoginBtn = document.getElementById('mobileLoginBtn');
-    const notesBtn = document.getElementById('notesBtn');
-    const mobileNotesBtn = document.getElementById('mobileNotesBtn');
-    
-    const discordBtn = document.getElementById('discordBtn');
-    const mobileDiscordBtn = document.getElementById('mobileDiscordBtn');
-    const docsBtn = document.getElementById('docsBtn');
-    const mobileDocsBtn = document.getElementById('mobileDocsBtn');
-
-    const suggestionBtn = document.getElementById('suggestionBtn');
-    const mobileSuggestionBtn = document.getElementById('mobileSuggestionBtn');
-    const suggestionModal = document.getElementById('suggestionModal');
-    const closeSuggestionBtn = document.getElementById('closeSuggestionBtn');
-    const suggestionGenre = document.getElementById('suggestionGenre');
-    const suggestionLabel = document.getElementById('suggestionLabel');
-    const suggestionInput = document.getElementById('suggestionInput');
-    const submitSuggestionBtn = document.getElementById('submitSuggestionBtn');
-
-    const notesModal = document.getElementById('notesModal');
-    const closeNotesBtn = document.getElementById('closeNotesBtn');
-    const saveNoteBtn = document.getElementById('saveNoteBtn');
-    const deleteNoteBtn = document.getElementById('deleteNoteBtn');
-    const noteTitleInput = document.getElementById('noteTitleInput');
-    const noteContentInput = document.getElementById('noteContentInput');
-    const notesTabs = document.getElementById('notesTabs');
-    const contextMenu = document.getElementById('contextMenu');
-    const renameNoteOption = document.getElementById('renameNoteOption');
-    const notificationArea = document.getElementById('notificationArea');
-
-    let currentSubject = 'math';
-    let userNotes = [];
-    let currentNoteIndex = -1;
-    let rightClickedTabIndex = -1;
-
-    navBtns.forEach(btn => {
-        if(btn.dataset.subject) {
-            btn.addEventListener('click', () => {
-                navBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                const subject = btn.dataset.subject;
-                currentSubject = subject;
-                body.className = `theme-${subject}`;
-
-                if (subject === 'math') {
-                    mathView.classList.remove('hidden');
-                    aiView.classList.add('hidden');
-                    setTimeout(drawGrid, 10);
-                } else {
-                    mathView.classList.add('hidden');
-                    aiView.classList.remove('hidden');
-                    aiTitle.textContent = subject.charAt(0).toUpperCase() + subject.slice(1) + " Helper";
-                    aiResponse.innerHTML = `<div class="empty-state"><span>I am ready to help you with ${subject}.</span></div>`;
-                }
-            });
-        }
-    });
-
-    mobileMenuBtn.addEventListener('click', () => {
-        mobileSidebar.classList.add('open');
-        sidebarOverlay.classList.add('open');
-    });
-
-    function closeSidebar() {
-        mobileSidebar.classList.remove('open');
-        sidebarOverlay.classList.remove('open');
-    }
-
-    closeSidebarBtn.addEventListener('click', closeSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
-
-    function showNotification(message) {
-        const notif = document.createElement('div');
-        notif.className = 'notification';
-        notif.textContent = message;
-        notificationArea.appendChild(notif);
+const router = {
+    routes: {
+        '/': 'view-editor',
+        '/exporting': 'view-exporting',
+        '/project-option': 'view-project-option',
+        '/savedprojects': 'view-saved-projects'
+    },
+    navigate: function(path) {
+        window.history.pushState({}, "", path);
+        this.render();
+    },
+    render: function() {
+        const path = window.location.pathname;
+        const viewId = this.routes[path] || 'view-editor';
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        const activeView = document.getElementById(viewId);
+        if (activeView) activeView.classList.remove('hidden');
         
-        requestAnimationFrame(() => notif.classList.add('show'));
-        
-        setTimeout(() => {
-            notif.classList.remove('show');
-            setTimeout(() => notif.remove(), 400);
-        }, 3000);
+        if (path === '/exporting') startExportProcess();
+        if (path === '/savedprojects') renderSavedProjects();
     }
-
-    function handleDiscordClick(btn) {
-        if(btn) {
-            navigator.clipboard.writeText("https://discord.gg/eKC5CgEZbT");
-            const originalText = btn.textContent;
-            btn.textContent = "Copied!";
-            btn.classList.add('copied');
-            showNotification("Discord invite copied to clipboard!");
-            
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.classList.remove('copied');
-            }, 2000);
-        }
-    }
-
-    if(discordBtn) discordBtn.addEventListener('click', () => handleDiscordClick(discordBtn));
-    if(mobileDiscordBtn) mobileDiscordBtn.addEventListener('click', () => handleDiscordClick(mobileDiscordBtn));
-
-    function handleDocsClick() {
-        window.location.href = 'document/';
-    }
-
-    if(docsBtn) docsBtn.addEventListener('click', handleDocsClick);
-    if(mobileDocsBtn) mobileDocsBtn.addEventListener('click', handleDocsClick);
-
-    function openSuggestionModal() {
-        if(suggestionModal) {
-            suggestionModal.classList.remove('hidden');
-            closeSidebar();
-        }
-    }
-
-    if(suggestionBtn) suggestionBtn.addEventListener('click', openSuggestionModal);
-    if(mobileSuggestionBtn) mobileSuggestionBtn.addEventListener('click', openSuggestionModal);
-    if(closeSuggestionBtn) closeSuggestionBtn.addEventListener('click', () => suggestionModal.classList.add('hidden'));
-
-    if(suggestionGenre) {
-        suggestionGenre.addEventListener('change', () => {
-            const genre = suggestionGenre.value;
-            if(genre === 'AI Features') {
-                suggestionLabel.textContent = "What AI Features should be changed / added?";
-                suggestionInput.placeholder = "what ai features should i add onto the site?";
-            } else if(genre === 'Website changes') {
-                suggestionLabel.textContent = "What Website changes should be changed / added?";
-                suggestionInput.placeholder = "what should i change of the website design?";
-            } else {
-                suggestionLabel.textContent = "What Geometry changes should be changed / added?";
-                suggestionInput.placeholder = "what should i add onto this website for more geometry questions that will be more supported?";
-            }
-        });
-    }
-
-    if(submitSuggestionBtn) {
-        submitSuggestionBtn.addEventListener('click', async () => {
-            const genre = suggestionGenre.value;
-            const text = suggestionInput.value.trim();
-            
-            if (!text) {
-                alert("Please type a suggestion.");
-                return;
-            }
-
-            const date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            let username = "Guest";
-            
-            if (puter.auth.isSignedIn()) {
-                const user = await puter.auth.getUser();
-                username = user.username;
-            }
-
-            const payload = {
-                embeds: [{
-                    title: `${genre} * posted @ ${date}`,
-                    description: `* ${text}`,
-                    footer: { text: `By ${username}` },
-                    color: 5814783
-                }]
-            };
-
-            fetch("https://discord.com/api/webhooks/1450742401827344527/EOCnELh67IQvsrUelvM1zO4Ga_S1IxAb2_OEfsgVvMaRGGg97Xi6LHGI6ZMfy7oqzVzm", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            }).then(() => {
-                showNotification("Suggestion Submitted!");
-                suggestionModal.classList.add('hidden');
-                suggestionInput.value = "";
-            }).catch(() => {
-                alert("Failed to submit.");
-            });
-        });
-    }
-
-    async function checkAuth() {
-        try {
-            if (puter.auth.isSignedIn()) {
-                loginBtn.textContent = "Logout";
-                mobileLoginBtn.textContent = "Logout";
-                notesBtn.classList.remove('hidden');
-                mobileNotesBtn.classList.remove('hidden');
-                loadNotes();
-            } else {
-                loginBtn.textContent = "Login";
-                mobileLoginBtn.textContent = "Login";
-                notesBtn.classList.add('hidden');
-                mobileNotesBtn.classList.add('hidden');
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    async function handleAuth() {
-        try {
-            if (puter.auth.isSignedIn()) {
-                await puter.auth.signOut();
-            } else {
-                await puter.auth.signIn();
-            }
-            checkAuth();
-            closeSidebar();
-        } catch (e) {
-            alert("Unable to connect to authentication service.");
-        }
-    }
-
-    loginBtn.addEventListener('click', handleAuth);
-    mobileLoginBtn.addEventListener('click', handleAuth);
-
-    function openNotes() {
-        if (!puter.auth.isSignedIn()) return;
-        notesModal.classList.remove('hidden');
-        renderTabs();
-        closeSidebar();
-    }
-
-    notesBtn.addEventListener('click', openNotes);
-    mobileNotesBtn.addEventListener('click', openNotes);
-    closeNotesBtn.addEventListener('click', () => notesModal.classList.add('hidden'));
-
-    noteContentInput.addEventListener('paste', (e) => {
-        e.preventDefault();
-        let text = (e.clipboardData || window.clipboardData).getData('text/html') || (e.clipboardData || window.clipboardData).getData('text');
-        
-        let cleanText = text
-            .replace(/<a[^>]*>/g, "") 
-            .replace(/<\/a>/g, "") 
-            .replace(/🔗/g, "")
-            .replace(/(\r\n|\n|\r)/gm, "<br>");
-        
-        document.execCommand('insertHTML', false, cleanText);
-    });
-
-    async function loadNotes() {
-        try {
-            const data = await puter.kv.get('user_notes');
-            if (data) {
-                userNotes = JSON.parse(data);
-            } else {
-                userNotes = [];
-            }
-        } catch (e) {
-            userNotes = [];
-        }
-    }
-
-    async function saveNotesToCloud() {
-        try {
-            await puter.kv.set('user_notes', JSON.stringify(userNotes));
-        } catch (e) {
-            console.warn("Save failed");
-        }
-    }
-
-    function renderTabs() {
-        notesTabs.innerHTML = '';
-        const newTab = document.createElement('div');
-        newTab.className = `note-tab ${currentNoteIndex === -1 ? 'active' : ''}`;
-        newTab.textContent = '+ New Note';
-        newTab.onclick = () => selectNote(-1);
-        notesTabs.appendChild(newTab);
-
-        userNotes.forEach((note, index) => {
-            const tab = document.createElement('div');
-            tab.className = `note-tab ${currentNoteIndex === index ? 'active' : ''}`;
-            tab.textContent = note.title || 'Untitled';
-            
-            tab.onclick = () => selectNote(index);
-            
-            tab.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                rightClickedTabIndex = index;
-                contextMenu.style.top = `${e.clientY}px`;
-                contextMenu.style.left = `${e.clientX}px`;
-                contextMenu.classList.remove('hidden');
-            });
-
-            notesTabs.appendChild(tab);
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        if (!contextMenu.contains(e.target)) {
-            contextMenu.classList.add('hidden');
-        }
-    });
-
-    renameNoteOption.addEventListener('click', () => {
-        contextMenu.classList.add('hidden');
-        if (rightClickedTabIndex === -1) return;
-        
-        const tabs = notesTabs.querySelectorAll('.note-tab');
-        const targetTab = tabs[rightClickedTabIndex + 1]; 
-        
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = userNotes[rightClickedTabIndex].title;
-        input.className = 'tab-edit-input';
-        
-        targetTab.textContent = '';
-        targetTab.appendChild(input);
-        input.focus();
-
-        const saveRename = async () => {
-            const newTitle = input.value.trim() || 'Untitled';
-            userNotes[rightClickedTabIndex].title = newTitle;
-            if (currentNoteIndex === rightClickedTabIndex) {
-                noteTitleInput.value = newTitle;
-            }
-            await saveNotesToCloud();
-            renderTabs();
-        };
-
-        input.addEventListener('keydown', async (e) => {
-            if (e.key === 'Enter') {
-                await saveRename();
-            }
-        });
-        
-        input.addEventListener('blur', saveRename);
-    });
-
-    function selectNote(index) {
-        currentNoteIndex = index;
-        if (index === -1) {
-            noteTitleInput.value = '';
-            noteContentInput.innerHTML = '';
-            deleteNoteBtn.classList.add('hidden');
-        } else {
-            noteTitleInput.value = userNotes[index].title;
-            noteContentInput.innerHTML = userNotes[index].content;
-            deleteNoteBtn.classList.remove('hidden');
-        }
-        renderTabs();
-    }
-
-    saveNoteBtn.addEventListener('click', async () => {
-        const title = noteTitleInput.value.trim() || 'Untitled Note';
-        const content = noteContentInput.innerHTML;
-
-        if (currentNoteIndex === -1) {
-            userNotes.push({ title, content });
-            currentNoteIndex = userNotes.length - 1;
-        } else {
-            userNotes[currentNoteIndex] = { title, content };
-        }
-        
-        await saveNotesToCloud();
-        showNotification(`${title} has been saved!`);
-        renderTabs();
-    });
-
-    deleteNoteBtn.addEventListener('click', async () => {
-        if (currentNoteIndex > -1) {
-            userNotes.splice(currentNoteIndex, 1);
-            currentNoteIndex = -1;
-            selectNote(-1);
-            await saveNotesToCloud();
-        }
-    });
-
-    mathMode.addEventListener('change', () => {
-        solutionBox.innerHTML = '<div class="empty-state"><span>Answer and steps will appear here.</span></div>';
-        mathInput.value = '';
-        const mode = mathMode.value;
-
-        if (mode.includes('triangle')) {
-            graphCard.classList.add('hidden');
-            mathInput.placeholder = "Ex: 35 and 58";
-        } else {
-            graphCard.classList.remove('hidden');
-            setTimeout(drawGrid, 10);
-            if (mode === 'linear') mathInput.placeholder = "Ex: y = -x - 5";
-            if (mode === 'intercepts') mathInput.placeholder = "Ex: x-intercept 2, y-intercept 3";
-            if (mode === 'geometry') mathInput.placeholder = "Ex: (1,2) and (4,6)";
-        }
-    });
-
-    degreeBtn.addEventListener('click', () => {
-        mathInput.value += '°';
-        mathInput.focus();
-    });
-
-    solveBtn.addEventListener('click', () => {
-        const input = mathInput.value.toLowerCase().trim();
-        const mode = mathMode.value;
-        solutionBox.innerHTML = '';
-
-        if (!input) {
-            solutionBox.innerHTML = '<span style="color:red">Please type a problem first.</span>';
-            return;
-        }
-
-        try {
-            if (mode === 'linear') solveLinear(input);
-            else if (mode === 'intercepts') solveIntercepts(input);
-            else if (mode === 'geometry') solveGeometry(input);
-            else if (mode === 'triangle_in') solveTriangleInterior(input);
-            else if (mode === 'triangle_ex') solveTriangleExterior(input);
-        } catch (e) {
-            solutionBox.innerHTML = `<span style="color:red"><strong>Error:</strong> ${e.message}</span>`;
-        }
-    });
-
-    function cleanMathOutput(text) {
-        let cleaned = text
-            .replace(/\\\[/g, '') 
-            .replace(/\\\]/g, '')
-            .replace(/\\\(/g, '')
-            .replace(/\\\)/g, '')
-            .replace(/\\circ/g, '°')
-            .replace(/\\times/g, '×')
-            .replace(/\\cdot/g, '•')
-            .replace(/\\pm/g, '±')
-            .replace(/\\sqrt\{([^}]+)\}/g, '√$1')
-            .replace(/\\le/g, '≤')
-            .replace(/\\ge/g, '≥')
-            .replace(/\\angle/g, '∠')
-            .replace(/\^\{?\\circ\}?/g, '°')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n/g, '<br>');
-
-        cleaned = cleaned.replace(/(\d+)\/(\d+)/g, '<span class="frac"><span>$1</span><span class="symbol">/</span><span class="bottom">$2</span></span>');
-        
-        return cleaned;
-    }
-
-    async function callPuterAI(prompt, systemPrompt) {
-        try {
-            if (!puter.auth.isSignedIn()) {
-                await puter.auth.signIn();
-                return "Please try again after logging in.";
-            }
-
-            const resp = await puter.ai.chat(`${systemPrompt}\n\nUser Question: ${prompt}`, { model: 'google/gemini-1.5-pro' });
-            return cleanMathOutput(resp.message.content);
-        } catch (e) {
-            console.error(e);
-            return "Unable to connect to AI.";
-        }
-    }
-
-    solveMathAiBtn.addEventListener('click', async () => {
-        const input = mathInput.value.trim();
-        if (!input) {
-            solutionBox.innerHTML = '<span style="color:red">Please type a problem first.</span>';
-            return;
-        }
-
-        solutionBox.innerHTML = '<span style="color:var(--primary)">Thinking with AI...</span>';
-
-        try {
-            const result = await callPuterAI(input, "You are a Math expert. Do not use LaTeX blocks like \\[. Use plain text symbols (like °, x, /). Use vertical fractions. Solve step-by-step.");
-            solutionBox.innerHTML = result;
-        } catch (e) {
-            solutionBox.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
-        }
-    });
-
-    askAiBtn.addEventListener('click', async () => {
-        const prompt = aiPrompt.value.trim();
-        if (!prompt) return;
-
-        aiResponse.innerHTML = '<span style="color:var(--primary)">Thinking...</span>';
-
-        let sysPrompt = "You are a helpful tutor. Do not use LaTeX. Use simple readable symbols.";
-        if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words. No LaTeX.";
-        if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature.";
-        if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately.";
-        if (currentSubject === 'science') sysPrompt = "You are a Science tutor. Explain concepts accurately.";
-
-        try {
-            const result = await callPuterAI(prompt, sysPrompt);
-            aiResponse.innerHTML = result;
-        } catch (e) {
-            aiResponse.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
-        }
-    });
-
-    function solveTriangleExterior(input) {
-        const nums = input.match(/(\d+(\.\d+)?)/g);
-        if (!nums || nums.length < 2) throw new Error("Need two interior angles.");
-        
-        const a1 = parseFloat(nums[0]);
-        const a2 = parseFloat(nums[1]);
-
-        if (a1 <= 0 || a2 <= 0) throw new Error("Angles must be positive.");
-        
-        const exterior = parseFloat((a1 + a2).toFixed(2));
-
-        let html = `<span class="step-header">Given Interior Angles</span>`;
-        html += `Angle A = ${a1}°<br>Angle B = ${a2}°`;
-        html += `<hr class="step-line">`;
-        html += `<span class="step-header">Theorem: Exterior Angle Theorem</span>`;
-        html += `The exterior angle equals the sum of the two opposite interior angles.<br><br>`;
-        html += `Formula: x = Angle A + Angle B<br>`;
-        html += `Substitution: x = ${a1} + ${a2}<br>`;
-        html += `<hr class="step-line">`;
-        html += `<strong>Final Answer: x = ${exterior}°</strong>`;
-
-        solutionBox.innerHTML = html;
-    }
-
-    function solveTriangleInterior(input) {
-        const nums = input.match(/(\d+(\.\d+)?)/g);
-        if (!nums || nums.length < 2) throw new Error("Need two angles.");
-        
-        const a1 = parseFloat(nums[0]);
-        const a2 = parseFloat(nums[1]);
-
-        if (a1 + a2 >= 180) throw new Error("Sum is too large to form a triangle.");
-
-        const a3 = parseFloat((180 - (a1 + a2)).toFixed(2));
-
-        let html = `<span class="step-header">Given Angles</span>`;
-        html += `Angle A = ${a1}°<br>Angle B = ${a2}°`;
-        html += `<hr class="step-line">`;
-        html += `<span class="step-header">Theorem: Triangle Sum Theorem</span>`;
-        html += `The sum of angles in a triangle is always 180°.<br><br>`;
-        html += `Formula: x + ${a1} + ${a2} = 180<br>`;
-        html += `Simplify: x + ${parseFloat((a1+a2).toFixed(2))} = 180<br>`;
-        html += `Solve: x = 180 - ${parseFloat((a1+a2).toFixed(2))}<br>`;
-        html += `<hr class="step-line">`;
-        html += `<strong>Final Answer: x = ${a3}°</strong>`;
-
-        solutionBox.innerHTML = html;
-    }
-
-    function solveLinear(input) {
-        let clean = input.replace(/\s+/g, '').replace('y=', '');
-        
-        let m = 0, b = 0;
-        
-        if (/^x\s*=\s*([+-]?\d*\.?\d*)$/.test(input.replace(/\s+/g, ''))) {
-             throw new Error("This is a vertical line. Slope is undefined.");
-        }
-
-        const match = clean.match(/^([+-]?\d*\.?\d*)?x([+-]?\d*\.?\d*)?$/);
-        
-        if (match) {
-            let mStr = match[1];
-            let bStr = match[2];
-
-            if (mStr === undefined || mStr === '' || mStr === '+') m = 1;
-            else if (mStr === '-') m = -1;
-            else m = parseFloat(mStr);
-
-            if (bStr === undefined || bStr === '') b = 0;
-            else b = parseFloat(bStr);
-        } else {
-            const constMatch = clean.match(/^([+-]?\d*\.?\d*)$/);
-            if (constMatch) {
-                m = 0;
-                b = parseFloat(constMatch[1]);
-            } else {
-                throw new Error("Format not recognized. Try y=mx+b");
-            }
-        }
-
-        const xInt = m !== 0 ? -b/m : null;
-
-        let html = `<span class="step-header">Identify Parts</span>`;
-        html += `Slope (m) = ${m}<br>Y-Intercept (b) = ${b}`;
-        html += `<hr class="step-line">`;
-        html += `<span class="step-header">Plotting Steps</span>`;
-        html += `1. Start at the Y-intercept: (0, ${b})<br>`;
-        html += `2. Use slope ${m} (rise/run) to find the next point.<br>`;
-        html += `   Next Point: (1, ${parseFloat((m*1+b).toFixed(2))})<br>`;
-        
-        if (xInt !== null) {
-            html += `3. Find X-intercept (where y=0):<br>`;
-            html += `   0 = ${m}x + ${b} → ${-b} = ${m}x → x = ${parseFloat(xInt.toFixed(2))}<br>`;
-            html += `   Point: (${parseFloat(xInt.toFixed(2))}, 0)`;
-        }
-
-        solutionBox.innerHTML = html;
-        drawGrid();
-        drawLine(m, b);
-        drawPoint(0, b, '#d32f2f');
-        if(xInt !== null) drawPoint(xInt, 0, '#1976d2');
-    }
-
-    function solveIntercepts(input) {
-        const xMatch = input.match(/x.*?(-?\d+\.?\d*)/);
-        const yMatch = input.match(/y.*?(-?\d+\.?\d*)/);
-
-        if (!xMatch || !yMatch) throw new Error("Please type 'x-intercept 2' and 'y-intercept 3'.");
-
-        const xInt = parseFloat(xMatch[1]);
-        const yInt = parseFloat(yMatch[1]);
-
-        if (xInt === 0 && yInt === 0) throw new Error("Intercepts at origin needs more info to graph line.");
-
-        const m = (yInt - 0) / (0 - xInt);
-        const eq = `y = ${parseFloat(m.toFixed(2))}x + ${yInt}`;
-
-        let html = `<span class="step-header">Given Points</span>`;
-        html += `X-Intercept: (${xInt}, 0)<br>Y-Intercept: (0, ${yInt})`;
-        html += `<hr class="step-line">`;
-        html += `<span class="step-header">Find Equation</span>`;
-        html += `Slope (m) = (y2 - y1) / (x2 - x1)<br>`;
-        html += `m = (${yInt} - 0) / (0 - ${xInt}) = ${parseFloat(m.toFixed(2))}<br>`;
-        html += `<strong>Equation: ${eq}</strong>`;
-
-        solutionBox.innerHTML = html;
-        drawGrid();
-        drawPoint(xInt, 0, '#1976d2');
-        drawPoint(0, yInt, '#d32f2f');
-        drawLine(m, yInt);
-    }
-
-    function solveGeometry(input) {
-        const nums = input.match(/-?\d+(\.\d+)?/g);
-        if (!nums || nums.length < 4) throw new Error("Enter two points like (1,2) and (4,6).");
-
-        const x1 = parseFloat(nums[0]), y1 = parseFloat(nums[1]);
-        const x2 = parseFloat(nums[2]), y2 = parseFloat(nums[3]);
-
-        if (x1 === x2 && y1 === y2) throw new Error("Points are the same.");
-
-        const dist = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
-        const mx = (x1+x2)/2;
-        const my = (y1+y2)/2;
-
-        let m = null, b = null, eq = "";
-        let isVertical = false;
-
-        if (x1 === x2) {
-            isVertical = true;
-            eq = `x = ${x1}`;
-        } else {
-            m = (y2-y1)/(x2-x1);
-            b = y1 - (m * x1);
-            eq = `y = ${parseFloat(m.toFixed(2))}x + ${parseFloat(b.toFixed(2))}`;
-        }
-
-        let html = `<span class="step-header">Points Analyzed</span>`;
-        html += `Point A: (${x1}, ${y1})<br>Point B: (${x2}, ${y2})`;
-        html += `<hr class="step-line">`;
-        html += `<span class="step-header">Calculations</span>`;
-        html += `<strong>Distance:</strong> √[(${x2}-${x1})² + (${y2}-${y1})²] = ${parseFloat(dist.toFixed(2))}<br>`;
-        html += `<strong>Midpoint:</strong> (${mx}, ${my})<br>`;
-        html += `<strong>Slope:</strong> ${isVertical ? 'Undefined' : parseFloat(m.toFixed(2))}<br>`;
-        html += `<strong>Equation:</strong> ${eq}`;
-
-        solutionBox.innerHTML = html;
-        drawGrid();
-        drawPoint(x1, y1, '#1976d2');
-        drawPoint(x2, y2, '#1976d2');
-        drawPoint(mx, my, '#388e3c');
-
-        if (isVertical) {
-            ctx.strokeStyle = '#ffb300'; ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(mapX(x1), 0); ctx.lineTo(mapX(x1), canvas.height);
-            ctx.stroke();
-        } else {
-            drawLine(m, b);
-        }
-    }
-
-    function mapX(x) { return (canvas.width / 2) + (x * 20); }
-    function mapY(y) { return (canvas.height / 2) - (y * 20); }
-
-    function drawGrid() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const w = canvas.width, h = canvas.height, s = 20;
-
-        ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 1;
-        ctx.fillStyle = '#757575'; ctx.font = '10px Arial'; ctx.textAlign = 'center';
-
-        for (let x = 0; x <= w; x += s) {
-            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
-            if (x % (s*2) === 0 && x !== w/2) ctx.fillText((x-w/2)/s, x, h/2 + 15);
-        }
-        for (let y = 0; y <= h; y += s) {
-            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-            if (y % (s*2) === 0 && y !== h/2) ctx.fillText((h/2-y)/s, w/2 - 15, y + 4);
-        }
-
-        ctx.strokeStyle = '#424242'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
-    }
-
-    function drawPoint(x, y, color) {
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(mapX(x), mapY(y), 5, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    function drawLine(m, b) {
-        ctx.strokeStyle = '#ffb300'; ctx.lineWidth = 3;
-        ctx.beginPath();
-        const x1 = -20, y1 = m * x1 + b;
-        const x2 = 20, y2 = m * x2 + b;
-        ctx.moveTo(mapX(x1), mapY(y1));
-        ctx.lineTo(mapX(x2), mapY(y2));
-        ctx.stroke();
-    }
-
-    checkAuth();
+};
+
+window.addEventListener('popstate', () => router.render());
+
+const trackContainer = document.getElementById('tracks-container');
+const timeDisplay = document.getElementById('time-display');
+const playhead = document.getElementById('playhead');
+const playBtn = document.getElementById('play-btn');
+const playIcon = document.getElementById('play-icon');
+const splitBtn = document.getElementById('split-btn');
+const deleteBtn = document.getElementById('delete-btn');
+const chatWidget = document.getElementById('ai-widget');
+const chatHeader = document.getElementById('widget-header');
+const chatOverlay = document.getElementById('ai-overlay');
+const chatHistory = document.getElementById('chat-stream');
+const typingIndicator = document.getElementById('typing-dots');
+const controlPanel = document.getElementById('control-panel');
+const menuBtn = document.getElementById('mobile-menu-btn');
+const loginBtn = document.getElementById('login-btn');
+const userProfile = document.getElementById('user-profile');
+const userAvatar = document.getElementById('user-avatar');
+const videoPlayer = document.getElementById('main-video');
+const videoStage = document.getElementById('video-stage');
+const videoCanvas = document.getElementById('video-canvas');
+const ctx = videoCanvas.getContext('2d');
+const renameModal = document.getElementById('rename-modal');
+const mobileDeleteModal = document.getElementById('mobile-delete-modal');
+
+menuBtn.addEventListener('click', () => {
+    controlPanel.classList.toggle('collapsed');
 });
+
+document.getElementById('nav-projects-btn').addEventListener('click', () => router.navigate('/savedprojects'));
+document.getElementById('nav-logo').addEventListener('click', () => router.navigate('/savedprojects'));
+
+document.getElementById('mobile-del-btn').addEventListener('click', () => {
+    const select = document.getElementById('mobile-delete-select');
+    select.innerHTML = '';
+    savedProjects.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.innerText = p.name;
+        select.appendChild(opt);
+    });
+    if(savedProjects.length > 0) mobileDeleteModal.classList.remove('hidden');
+    else alert("No projects to delete.");
+});
+
+document.getElementById('cancel-mobile-del').addEventListener('click', () => mobileDeleteModal.classList.add('hidden'));
+document.getElementById('confirm-mobile-del').addEventListener('click', () => {
+    const id = document.getElementById('mobile-delete-select').value;
+    deleteProject(id);
+    mobileDeleteModal.classList.add('hidden');
+    if(window.location.pathname === '/savedprojects') renderSavedProjects();
+});
+
+function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function generateSound(type) {
+    initAudio();
+    const sampleRate = audioCtx.sampleRate;
+    const duration = 2.0; 
+    const frameCount = sampleRate * duration;
+    const buffer = audioCtx.createBuffer(2, frameCount, sampleRate);
+
+    for (let channel = 0; channel < 2; channel++) {
+        const data = buffer.getChannelData(channel);
+        for (let i = 0; i < frameCount; i++) {
+            const t = i / sampleRate;
+            let val = 0;
+
+            if (type === 'drum') {
+                val = Math.sin(t * 80 * Math.PI) * Math.exp(-t * 10);
+                if(i < 300) val += (Math.random()-0.5);
+            } else if (type === 'snare') {
+                val = (Math.random() - 0.5) * Math.exp(-t * 15);
+            } else if (type === 'hihat') {
+                val = (Math.random() - 0.5) * Math.exp(-t * 50) * (i%3 ? 0.8 : 0);
+            } else if (type === '808') {
+                val = Math.sin(t * 50 * Math.PI) * Math.exp(-t * 1.5);
+                val = Math.tanh(val * 4); 
+            } else if (type === 'bass') {
+                val = Math.sin(t * 90 * Math.PI) * 0.7 + Math.sin(t * 180 * Math.PI) * 0.3;
+            } else if (type === 'piano') {
+                val = Math.sin(t * 440 * Math.PI) * Math.exp(-t * 3) * 0.5;
+            } else if (type === 'guitar') {
+                val = (Math.abs((t * 220 * 2) % 2 - 1) * 2 - 1) * Math.exp(-t*3) * 0.5;
+            } else if (type === 'flute') {
+                val = Math.sin(t * 660 * Math.PI) * 0.4;
+            } else if (type === 'sax') {
+                const wave = (Math.abs((t * 180 * 2) % 2 - 1) * 2 - 1);
+                val = wave * Math.exp(-t*0.5) + (Math.random()-0.5)*0.1;
+                val *= 0.5;
+            } else if (type === 'trumpet') {
+                val = Math.max(-0.5, Math.min(0.5, Math.sin(t * 350 * Math.PI) * 2));
+            } else if (type === 'harp') {
+                val = Math.sin(t * 500 * Math.PI) * Math.exp(-t * 8) * 0.5;
+            } else if (type === 'choir') {
+                val = (Math.sin(t * 300 * Math.PI) + Math.sin(t * 304 * Math.PI)) * 0.3 * Math.min(1,t*2);
+            } else if (type === 'lofi') {
+                val = (Math.random()-0.5)*0.1 + Math.sin(t*100*Math.PI)*0.2;
+            } else if (type === 'techno') {
+                val = (Math.sin(t * 120 * Math.PI) > 0 ? 0.6 : -0.6);
+            } else if (type === 'synth') {
+                val = (Math.random()*0.1 + Math.sin(t * 440 * Math.PI * (1 + 0.01*Math.sin(t*5)))) * 0.5;
+            } else if (type === 'strings') {
+                val = (Math.sin(t * 440 * Math.PI) + Math.sin(t * 442 * Math.PI)) * 0.3;
+            } else if (type === 'bell') {
+                val = Math.sin(t * 1200 * Math.PI) * Math.exp(-t * 12) * 0.5;
+            } else if (type === 'marimba') {
+                val = Math.sin(t * 400 * 2 * Math.PI) * Math.exp(-t * 20);
+            } else if (type === '8bit') {
+                val = Math.round(Math.sin(t * 440 * Math.PI)) * 0.3;
+            }
+            data[i] = val;
+        }
+    }
+    return buffer;
+}
+
+function selectClip(element, trackId) {
+    document.querySelectorAll('.clip').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+    selectedTrackId = trackId;
+    deleteBtn.classList.remove('hidden');
+    splitBtn.classList.remove('hidden');
+}
+
+function deselectAll() {
+    document.querySelectorAll('.clip').forEach(el => el.classList.remove('active'));
+    selectedTrackId = null;
+    deleteBtn.classList.add('hidden');
+    splitBtn.classList.add('hidden');
+}
+
+function splitSelectedTrack() {
+    if(!selectedTrackId) return;
+    const now = audioCtx.currentTime;
+    const playheadTime = (parseFloat(playhead.style.left) / 100) * timelineDuration || 0;
+    
+    const track = tracks.find(t => Math.floor(t.id) === Math.floor(selectedTrackId));
+    if(!track) return;
+
+    const clipStart = track.offsetPercent * timelineDuration;
+    const clipEnd = clipStart + (track.durationPercent * timelineDuration);
+
+    if(playheadTime > clipStart && playheadTime < clipEnd) {
+        const firstDuration = playheadTime - clipStart;
+        const secondDuration = clipEnd - playheadTime;
+        
+        track.durationPercent = firstDuration / timelineDuration;
+        const el = document.getElementById(`clip-${Math.floor(track.id)}`);
+        if(el) el.style.width = (track.durationPercent * 100) + '%';
+
+        addTrack(track.name, track.type, track.buffer, track.isVideo, track.videoSrc);
+        const newTrack = tracks[tracks.length - 1];
+        newTrack.offsetPercent = playheadTime / timelineDuration;
+        newTrack.durationPercent = secondDuration / timelineDuration;
+        
+        const newEl = document.getElementById(`clip-${Math.floor(newTrack.id)}`);
+        if(newEl) {
+            newEl.style.left = (newTrack.offsetPercent * 100) + '%';
+            newEl.style.width = (newTrack.durationPercent * 100) + '%';
+        }
+    }
+}
+
+function deleteSelectedTrack() {
+    if (selectedTrackId) {
+        const clipEl = document.getElementById(`clip-${Math.floor(selectedTrackId)}`);
+        if (clipEl) {
+            const trackEl = clipEl.closest('.track-block');
+            trackEl.remove();
+        }
+        tracks = tracks.filter(t => Math.floor(t.id) !== Math.floor(selectedTrackId));
+        deselectAll();
+        if (tracks.length === 0) {
+            videoPlayer.src = "";
+            videoStage.classList.add('hidden');
+        }
+    }
+}
+
+function makeInteractable(element, trackObj) {
+    let mode = 'none'; 
+    let startX;
+    let initialLeft;
+    let initialWidth;
+    let parentWidth;
+
+    const leftHandle = document.createElement('div');
+    leftHandle.className = 'clip-handle left';
+    element.appendChild(leftHandle);
+
+    const rightHandle = document.createElement('div');
+    rightHandle.className = 'clip-handle right';
+    element.appendChild(rightHandle);
+
+    function startInteraction(e, action) {
+        mode = action;
+        selectClip(element, trackObj.id);
+        startX = (e.touches ? e.touches[0].clientX : e.clientX);
+        initialLeft = element.offsetLeft;
+        initialWidth = element.offsetWidth;
+        parentWidth = element.parentElement.offsetWidth;
+        if (mode === 'move') element.style.cursor = 'grabbing';
+        e.stopPropagation();
+    }
+
+    function move(e) {
+        if (mode === 'none') return;
+        const clientX = (e.touches ? e.touches[0].clientX : e.clientX);
+        const deltaX = clientX - startX;
+
+        if (mode === 'move') {
+            let newLeft = initialLeft + deltaX;
+            if (newLeft < 0) newLeft = 0;
+            if (newLeft + element.offsetWidth > parentWidth) newLeft = parentWidth - element.offsetWidth;
+            element.style.left = newLeft + 'px';
+            trackObj.offsetPercent = newLeft / parentWidth;
+        } 
+        else if (mode === 'resize-right') {
+            let newWidth = initialWidth + deltaX;
+            if (newWidth < 20) newWidth = 20;
+            if (element.offsetLeft + newWidth > parentWidth) newWidth = parentWidth - element.offsetLeft;
+            element.style.width = newWidth + 'px';
+            trackObj.durationPercent = newWidth / parentWidth;
+        }
+        else if (mode === 'resize-left') {
+            let newWidth = initialWidth - deltaX;
+            let newLeft = initialLeft + deltaX;
+            if (newWidth < 20) return;
+            if (newLeft < 0) newLeft = 0;
+            element.style.width = newWidth + 'px';
+            element.style.left = newLeft + 'px';
+            trackObj.offsetPercent = newLeft / parentWidth;
+            trackObj.durationPercent = newWidth / parentWidth;
+        }
+    }
+
+    function endInteraction() {
+        if (mode !== 'none') {
+            mode = 'none';
+            element.style.cursor = 'pointer';
+        }
+    }
+
+    rightHandle.addEventListener('mousedown', (e) => startInteraction(e, 'resize-right'));
+    rightHandle.addEventListener('touchstart', (e) => startInteraction(e, 'resize-right'), {passive: false});
+    leftHandle.addEventListener('mousedown', (e) => startInteraction(e, 'resize-left'));
+    leftHandle.addEventListener('touchstart', (e) => startInteraction(e, 'resize-left'), {passive: false});
+    element.addEventListener('mousedown', (e) => {
+        if(e.target === rightHandle || e.target === leftHandle) return;
+        startInteraction(e, 'move');
+    });
+    element.addEventListener('touchstart', (e) => {
+        if(e.target === rightHandle || e.target === leftHandle) return;
+        startInteraction(e, 'move');
+    }, {passive: false});
+    window.addEventListener('mousemove', move);
+    window.addEventListener('touchmove', (e) => {
+        if(mode !== 'none') { e.preventDefault(); move(e); }
+    }, {passive: false});
+    window.addEventListener('mouseup', endInteraction);
+    window.addEventListener('touchend', endInteraction);
+    element.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectClip(element, trackObj.id);
+    });
+}
+
+function addTrack(name, type, buffer = null, isVideo = false, src = null) {
+    initAudio(); 
+    const newBuffer = buffer || (isVideo ? null : generateSound(type));
+    const trackId = Date.now() + Math.random();
+    const defaultDurationPct = 2.0 / timelineDuration;
+
+    const trackObj = {
+        id: trackId,
+        name: name,
+        type: type,
+        buffer: newBuffer,
+        gain: audioCtx.createGain(),
+        offsetPercent: 0,
+        durationPercent: defaultDurationPct, 
+        isVideo: isVideo,
+        videoSrc: src
+    };
+    
+    if(!isVideo) trackObj.gain.connect(audioCtx.destination);
+    tracks.push(trackObj);
+
+    const div = document.createElement('div');
+    div.className = 'track-block';
+    div.innerHTML = `
+        <div class="track-info">
+            <div class="track-title">${name}</div>
+            <div class="track-meta">${type.toUpperCase()}</div>
+        </div>
+        <div class="track-timeline">
+            <div class="clip ${type}" id="clip-${Math.floor(trackId)}" style="width: ${defaultDurationPct * 100}%">
+                <span>${name}</span>
+            </div>
+        </div>
+    `;
+    trackContainer.appendChild(div);
+
+    const clip = div.querySelector(`.clip`);
+    makeInteractable(clip, trackObj);
+
+    const emptyMsg = document.querySelector('.empty-state');
+    if (emptyMsg) emptyMsg.remove();
+}
+
+document.getElementById('video-upload').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        if (videoObjectUrl) URL.revokeObjectURL(videoObjectUrl);
+        videoObjectUrl = URL.createObjectURL(file);
+        videoPlayer.src = videoObjectUrl;
+        videoStage.classList.remove('hidden');
+        addTrack('Video Track', 'video', null, true, videoObjectUrl);
+    }
+});
+
+function togglePlay() {
+    initAudio(); 
+    if (isPlaying) stopAll();
+    else playAll();
+}
+
+function playAll() {
+    activeSources = [];
+    const now = audioCtx.currentTime;
+
+    if(videoPlayer.src) videoPlayer.play();
+
+    tracks.forEach(track => {
+        if(track.isVideo) return;
+
+        const source = audioCtx.createBufferSource();
+        source.buffer = track.buffer;
+        source.connect(track.gain);
+        
+        track.gain.gain.value = document.getElementById('vol-slider').value;
+        source.playbackRate.value = document.getElementById('speed-slider').value;
+
+        const startTimeOffset = track.offsetPercent * timelineDuration;
+        const clipDuration = track.durationPercent * timelineDuration;
+        
+        if (startTimeOffset < timelineDuration) {
+            source.loop = true; 
+            source.start(now + startTimeOffset, 0, clipDuration);
+            activeSources.push(source);
+        }
+    });
+
+    isPlaying = true;
+    playIcon.innerText = "■"; 
+    playBtn.style.backgroundColor = "white";
+    playIcon.style.color = "black";
+    animatePlayhead(now, timelineDuration);
+}
+
+function stopAll() {
+    activeSources.forEach(src => {
+        try { src.stop(); } catch(e) {}
+    });
+    activeSources = [];
+    
+    if(videoPlayer.src) {
+        videoPlayer.pause();
+        videoPlayer.currentTime = 0;
+    }
+
+    isPlaying = false;
+    playIcon.innerText = "▶";
+    playBtn.style.backgroundColor = "";
+    playIcon.style.color = "";
+    if(animationFrame) cancelAnimationFrame(animationFrame);
+    playhead.style.left = '0%';
+    timeDisplay.innerText = "00:00:00";
+}
+
+function animatePlayhead(audioStartTime, duration) {
+    function step() {
+        if (!isPlaying) return;
+        const now = audioCtx.currentTime;
+        const elapsed = now - audioStartTime;
+        if (elapsed > duration) { stopAll(); return; }
+        const percent = (elapsed / duration) * 100;
+        playhead.style.left = percent + '%';
+        const totalSec = Math.floor(elapsed);
+        const m = Math.floor(totalSec / 60);
+        const s = totalSec % 60;
+        const ms = Math.floor((elapsed % 1) * 100);
+        timeDisplay.innerText = `00:${m<10?'0'+m:m}:${s<10?'0'+s:s}:${ms<10?'0'+ms:ms}`;
+        animationFrame = requestAnimationFrame(step);
+    }
+    step();
+}
+
+if (window.innerWidth > 768) {
+    let isDraggingChat = false;
+    let chatStartX, chatStartY, chatInitX, chatInitY;
+    chatHeader.addEventListener('mousedown', (e) => {
+        isDraggingChat = true;
+        chatStartX = e.clientX;
+        chatStartY = e.clientY;
+        const rect = chatWidget.getBoundingClientRect();
+        chatInitX = rect.left;
+        chatInitY = rect.top;
+        chatWidget.style.right = 'auto';
+        chatWidget.style.bottom = 'auto';
+        chatHeader.style.cursor = 'grabbing';
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (!isDraggingChat) return;
+        chatWidget.style.left = `${chatInitX + (e.clientX - chatStartX)}px`;
+        chatWidget.style.top = `${chatInitY + (e.clientY - chatStartY)}px`;
+    });
+    window.addEventListener('mouseup', () => {
+        isDraggingChat = false;
+        chatHeader.style.cursor = 'move';
+    });
+}
+
+playBtn.addEventListener('click', togglePlay);
+document.getElementById('stop-btn').addEventListener('click', stopAll);
+deleteBtn.addEventListener('click', deleteSelectedTrack);
+splitBtn.addEventListener('click', splitSelectedTrack);
+
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+        e.preventDefault();
+        togglePlay();
+    }
+    if (selectedTrackId) {
+        if (e.key === 'Delete' || e.key === 'Backspace') deleteSelectedTrack();
+        if (e.ctrlKey && e.key === 'c') splitSelectedTrack();
+    }
+});
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.clip') && !e.target.closest('#delete-btn') && !e.target.closest('#split-btn')) {
+        deselectAll();
+    }
+});
+
+document.getElementById('add-track-btn').addEventListener('click', () => {
+    initAudio();
+    const select = document.getElementById('instrument-select');
+    addTrack(select.options[select.selectedIndex].text, select.value);
+});
+
+document.getElementById('record-btn').addEventListener('click', async () => {
+    initAudio();
+    const btn = document.getElementById('record-btn');
+    if (!isRecording) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(audioChunks, { type: 'audio/wav' });
+                const buf = await blob.arrayBuffer();
+                const audioBuffer = await audioCtx.decodeAudioData(buf);
+                addTrack('Recording', 'mic', audioBuffer);
+            };
+            mediaRecorder.start();
+            isRecording = true;
+            btn.classList.add('active');
+        } catch (e) {
+            alert('Mic permission denied.');
+        }
+    } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        btn.classList.remove('active');
+    }
+});
+
+document.getElementById('speed-slider').addEventListener('input', (e) => {
+    if(isPlaying && activeSources.length > 0) {
+        activeSources.forEach(src => src.playbackRate.value = e.target.value);
+    }
+});
+
+document.getElementById('export-trigger-btn').addEventListener('click', () => {
+    if(tracks.length === 0) return alert("Project is empty.");
+    
+    const quality = document.getElementById('video-quality').value;
+    const height = parseInt(quality);
+    const width = Math.round(height * (16/9));
+    
+    videoCanvas.width = width;
+    videoCanvas.height = height;
+    
+    router.navigate('/exporting');
+});
+
+function startExportProcess() {
+    const fill = document.getElementById('export-fill');
+    let progress = 0;
+    exportInterval = setInterval(() => {
+        progress += Math.random() * 2;
+        if(progress >= 100) {
+            progress = 100;
+            clearInterval(exportInterval);
+            setTimeout(() => router.navigate('/project-option'), 500);
+        }
+        fill.style.width = progress + '%';
+    }, 50);
+}
+
+document.getElementById('opt-yes-btn').addEventListener('click', () => {
+    const count = savedProjects.length + 1;
+    const format = document.getElementById('export-format').value;
+    const id = 'lumibeat-' + (count < 10 ? '0' + count : count);
+    
+    savedProjects.unshift({
+        id: id,
+        name: `lumibeat-${count < 10 ? '0' + count : count}`,
+        date: 'Just Now',
+        type: format.toUpperCase()
+    });
+    
+    router.navigate('/savedprojects');
+});
+
+document.getElementById('opt-no-btn').addEventListener('click', () => router.navigate('/'));
+
+document.getElementById('new-project-btn').addEventListener('click', () => {
+    tracks = [];
+    trackContainer.innerHTML = `<div class="empty-state"><p>Studio Ready.</p><p class="sub-text">Add Video, Audio, or use AI to begin.</p></div>`;
+    router.navigate('/');
+});
+
+function renderSavedProjects() {
+    const grid = document.getElementById('project-grid');
+    grid.innerHTML = '';
+    savedProjects.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'project-card';
+        card.innerHTML = `
+            <div class="card-prev">LUMI</div>
+            <div class="card-info">
+                <h3>${p.name}</h3>
+                <span>${p.type} • ${p.date}</span>
+            </div>
+            <button class="card-menu-btn">⋮</button>
+            <div class="menu-dropdown hidden">
+                <button class="menu-item rename">Rename Project</button>
+                <button class="menu-item delete">Delete</button>
+            </div>
+        `;
+        
+        const menuBtn = card.querySelector('.card-menu-btn');
+        const dropdown = card.querySelector('.menu-dropdown');
+        
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.menu-dropdown').forEach(d => d.classList.add('hidden'));
+            dropdown.classList.remove('hidden');
+        });
+        
+        card.querySelector('.rename').addEventListener('click', (e) => {
+            e.stopPropagation();
+            editingProjectId = p.id;
+            document.getElementById('rename-input').value = p.name;
+            renameModal.classList.remove('hidden');
+            dropdown.classList.add('hidden');
+        });
+        
+        card.querySelector('.delete').addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteProject(p.id);
+        });
+        
+        card.addEventListener('click', () => {
+            router.navigate('/');
+        });
+        
+        grid.appendChild(card);
+    });
+}
+
+function deleteProject(id) {
+    savedProjects = savedProjects.filter(p => p.id !== id);
+    renderSavedProjects();
+}
+
+document.getElementById('cancel-rename').addEventListener('click', () => renameModal.classList.add('hidden'));
+document.getElementById('confirm-rename').addEventListener('click', () => {
+    const newName = document.getElementById('rename-input').value;
+    if(newName) {
+        const p = savedProjects.find(p => p.id === editingProjectId);
+        if(p) p.name = newName;
+        renderSavedProjects();
+    }
+    renameModal.classList.add('hidden');
+});
+
+document.addEventListener('click', (e) => {
+    if(!e.target.closest('.card-menu-btn')) {
+        document.querySelectorAll('.menu-dropdown').forEach(d => d.classList.add('hidden'));
+    }
+});
+
+document.getElementById('ai-chat-toggle').addEventListener('click', () => {
+    chatWidget.classList.remove('hidden');
+    if(window.innerWidth < 600) chatOverlay.classList.remove('hidden');
+});
+document.getElementById('close-chat').addEventListener('click', () => {
+    chatWidget.classList.add('hidden');
+    chatOverlay.classList.add('hidden');
+});
+document.getElementById('ai-overlay').addEventListener('click', () => {
+    chatWidget.classList.add('hidden');
+    chatOverlay.classList.add('hidden');
+});
+
+function appendMessage(html, isAi) {
+    const div = document.createElement('div');
+    div.className = `msg ${isAi ? 'ai' : 'user'}`;
+    div.innerHTML = html;
+    chatHistory.appendChild(div);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+async function handleAiRequest() {
+    if (typeof puter === 'undefined' || !puter.auth) {
+        appendMessage("System error: AI service not loaded.", true);
+        return;
+    }
+    
+    if (!puter.auth.isSignedIn()) {
+        try {
+            await puter.auth.signIn();
+            updateProfileUI(await puter.auth.getUser());
+        } catch (e) {
+            appendMessage("Login required for AI.", true);
+            return;
+        }
+    }
+
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if(!text) return;
+    
+    appendMessage(text, false);
+    input.value = '';
+    typingIndicator.classList.remove('hidden');
+    
+    try {
+        const trackNames = tracks.map(t => t.name).join(', ');
+        const prompt = `User request: "${text}". Current tracks: [${trackNames}].
+        Act as Lumi AI music assistant. Return single token matching request.
+        Genre Tokens: [GENRE:LOFI], [GENRE:TRAP], [GENRE:TECHNO], [GENRE:ORCHESTRA].
+        Instrument Tokens: [ADD:drum], [ADD:snare], [ADD:hihat], [ADD:808], [ADD:bass], [ADD:piano], [ADD:guitar], [ADD:flute], [ADD:sax], [ADD:trumpet], [ADD:harp], [ADD:choir], [ADD:techno], [ADD:synth], [ADD:strings], [ADD:bell], [ADD:marimba], [ADD:8bit].
+        Text then token.`;
+        
+        const response = await puter.ai.chat(prompt);
+        
+        typingIndicator.classList.add('hidden');
+        
+        let displayMsg = response.replace(/\[(ADD|GENRE):\w+\]/g, '').trim();
+        if(!displayMsg) displayMsg = "Here is what I created for you.";
+        let actionBtn = '';
+        
+        if (response.includes('[GENRE:LOFI]')) actionBtn = createGenreBtn('lofi', 'Lo-Fi Beat');
+        else if (response.includes('[GENRE:TRAP]')) actionBtn = createGenreBtn('trap', 'Trap Bundle');
+        else if (response.includes('[GENRE:TECHNO]')) actionBtn = createGenreBtn('techno_set', 'Techno Set');
+        else if (response.includes('[GENRE:ORCHESTRA]')) actionBtn = createGenreBtn('orch', 'Orchestra');
+        else if (response.includes('[ADD:drum]')) actionBtn = createAiBtn('drum', 'Kick Drum');
+        else if (response.includes('[ADD:snare]')) actionBtn = createAiBtn('snare', 'Trap Snare');
+        else if (response.includes('[ADD:hihat]')) actionBtn = createAiBtn('hihat', 'Hi-Hats');
+        else if (response.includes('[ADD:808]')) actionBtn = createAiBtn('808', '808 Bass');
+        else if (response.includes('[ADD:bass]')) actionBtn = createAiBtn('bass', 'Deep Bass');
+        else if (response.includes('[ADD:piano]')) actionBtn = createAiBtn('piano', 'Grand Piano');
+        else if (response.includes('[ADD:guitar]')) actionBtn = createAiBtn('guitar', 'Guitar');
+        else if (response.includes('[ADD:flute]')) actionBtn = createAiBtn('flute', 'Jazz Flute');
+        else if (response.includes('[ADD:sax]')) actionBtn = createAiBtn('sax', 'Saxophone');
+        else if (response.includes('[ADD:trumpet]')) actionBtn = createAiBtn('trumpet', 'Trumpet');
+        else if (response.includes('[ADD:harp]')) actionBtn = createAiBtn('harp', 'Harp');
+        else if (response.includes('[ADD:choir]')) actionBtn = createAiBtn('choir', 'Choir');
+        else if (response.includes('[ADD:techno]')) actionBtn = createAiBtn('techno', 'Techno Lead');
+        else if (response.includes('[ADD:synth]')) actionBtn = createAiBtn('synth', 'Saw Synth');
+        else if (response.includes('[ADD:strings]')) actionBtn = createAiBtn('strings', 'Strings');
+        else if (response.includes('[ADD:bell]')) actionBtn = createAiBtn('bell', 'Cowbell');
+        else if (response.includes('[ADD:marimba]')) actionBtn = createAiBtn('marimba', 'Marimba');
+        else if (response.includes('[ADD:8bit]')) actionBtn = createAiBtn('8bit', '8-Bit');
+
+        appendMessage(displayMsg + actionBtn, true);
+        
+    } catch (e) {
+        typingIndicator.classList.add('hidden');
+        appendMessage("AI Service Offline. Try refreshing.", true);
+    }
+}
+
+function createAiBtn(type, name) {
+    return `<div class="ai-card"><button class="ai-btn-action" onclick="applyAi('${type}', '${name}')">✚ Add ${name}</button></div>`;
+}
+
+function createGenreBtn(type, name) {
+    return `<div class="ai-card"><button class="ai-btn-action" onclick="applyGenre('${type}')">✚ Create ${name}</button></div>`;
+}
+
+window.applyAi = (type, name) => {
+    addTrack(name, type);
+    appendMessage(`<i>Added ${name} to the timeline.</i>`, true);
+};
+
+window.applyGenre = (genre) => {
+    initAudio();
+    if(genre === 'lofi') {
+        addTrack('Lo-Fi Drums', 'lofi');
+        setTimeout(() => addTrack('Chill Piano', 'piano'), 100);
+        setTimeout(() => addTrack('Smooth Bass', 'bass'), 200);
+    } else if(genre === 'trap') {
+        addTrack('Hard Kick', 'drum');
+        setTimeout(() => addTrack('Trap Snare', 'snare'), 100);
+        setTimeout(() => addTrack('Hi-Hats', 'hihat'), 200);
+        setTimeout(() => addTrack('808 Sub', '808'), 300);
+    } else if(genre === 'techno_set') {
+        addTrack('Techno Lead', 'techno');
+        setTimeout(() => addTrack('Kick 4/4', 'drum'), 100);
+    } else if(genre === 'orch') {
+        addTrack('Violins', 'strings');
+        setTimeout(() => addTrack('Choir', 'choir'), 100);
+        setTimeout(() => addTrack('Harp Arp', 'harp'), 200);
+    }
+    appendMessage(`<i>Created genre tracks.</i>`, true);
+};
+
+document.getElementById('send-chat').addEventListener('click', handleAiRequest);
+document.getElementById('chat-input').addEventListener('keypress', (e) => {
+    if(e.key === 'Enter') handleAiRequest();
+});
+
+function updateProfileUI(user) {
+    if (user) {
+        loginBtn.classList.add('hidden');
+        userProfile.classList.remove('hidden');
+        userAvatar.innerText = user.username[0].toUpperCase();
+    }
+}
+
+loginBtn.addEventListener('click', async () => {
+    if(typeof puter !== 'undefined') {
+        try {
+            const user = await puter.auth.signIn();
+            updateProfileUI(user);
+        } catch(e) { }
+    }
+});
+
+if (typeof puter !== 'undefined') {
+    puter.auth.getUser().then(user => updateProfileUI(user)).catch(()=>{});
+}
+
+router.render();

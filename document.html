@@ -19,7 +19,12 @@
         <aside class="doc-sidebar">
             <ul>
                 <li class="active" data-target="intro">Introduction</li>
-                <li data-target="math">Math Tools</li>
+                <li data-target="math" id="mathMenuItem">
+                    Math Tools
+                    <ul class="sub-menu hidden" id="mathSubMenu">
+                        <li class="sub-item-text">learning to use</li>
+                    </ul>
+                </li>
                 <li data-target="ai">AI Helper</li>
                 <li data-target="notes">Note Taking</li>
                 <li data-target="subjects">Other Subjects</li>
@@ -29,37 +34,28 @@
         <div class="doc-content">
             
             <section id="intro" class="doc-section active">
-                <h1>Welcome to Learning GPA</h1>
-                <p>Your all-in-one helper for school. This guide will help you understand how to use the website effectively to improve your grades.</p>
-                
-                <div class="info-card">
-                    <h3>Getting Started</h3>
-                    <p>Simply navigate to the subject you need help with using the buttons on the main page. You can solve math problems, get AI assistance, and save your notes.</p>
-                </div>
+                <h1>Introduction</h1>
+                <p class="intro-text">
+                    Hello you are probably new to this website and is probably wondering "how do i use this website?", well the documents of the website will teach you <span class="underline">how to use this</span> <a href="https://learningpai.cfd/" class="brand-link"><span class="text-green">learning</span><span class="text-blue underline">GPA</span></a> <strong>website.</strong>, so you'll be able to pass your classes in no <span class="underline">time</span>. Anyways go to the next page to find more info.
+                </p>
             </section>
 
             <section id="math" class="doc-section hidden">
                 <h1>Math Tools</h1>
-                <p>Our math solver is designed for precision. Here is how to use the different modes:</p>
-                
-                <ul>
-                    <li><strong>Linear Equation:</strong> Enter formulas like <code>y = 2x + 1</code>. We will graph it and find the intercepts.</li>
-                    <li><strong>Intercepts:</strong> If you know where the line crosses the axes, enter them (e.g., x-intercept 2, y-intercept 3).</li>
-                    <li><strong>Geometry:</strong> Enter two coordinate points like <code>(1, 2)</code> and <code>(4, 6)</code> to find distance, midpoint, and slope.</li>
-                    <li><strong>Triangles:</strong> Enter two angles to find the third interior angle or the exterior angle.</li>
-                </ul>
+                <p class="tutorial-text">
+                    you see there is a <span class="hover-trigger"><span class="underline">select a problem type</span><img src="dropdownbox.png" class="hover-img" alt="Dropdown Box"></span> once you click that <strong>dropdown</strong> box it will include different <span class="hover-trigger"><span class="underline">math modes</span><img src="mathmodes.png" class="hover-img" alt="Math Modes"></span> <strong>linear equation</strong>, <strong>linear from intercepts</strong>, <strong>Geometry 2</strong>, <strong>Triangle (Find 3rd angle)</strong> anddd <strong>Triangle find exterior angle</strong> these math modes from my website are modes mostly to work with the website of aleks [aleks.com], but depending on what mode you've choose you can solve that problem directly from learning gpa to aleks, you can find graphs, graph point plots, linear from intercepts, and etc. Pretty much enter any equation stated in the format in the typing text box of the <span class="underline">main site</span>, and the website will solve it for you.
+                </p>
             </section>
 
             <section id="ai" class="doc-section hidden">
                 <h1>AI Helper</h1>
-                <p>We use advanced AI to explain concepts. The AI can help with:</p>
+                <p>We use AI to explain concepts. The AI can help with:</p>
                 <ul>
                     <li>Breaking down complex math problems.</li>
                     <li>Checking grammar for English essays.</li>
                     <li>Explaining historical events.</li>
-                    <li> clarifying scientific concepts.</li>
+                    <li>clarifying scientific concepts.</li>
                 </ul>
-                <p><em>Note: The AI will strictly stick to educational topics.</em></p>
             </section>
 
             <section id="notes" class="doc-section hidden">
@@ -68,9 +64,8 @@
                 <ol>
                     <li>Log in using the "Login" button.</li>
                     <li>Click "Your Notes" to open the editor.</li>
-                    <li>Type your title and content. You can even paste images or text from other sites.</li>
+                    <li>Type your title and content.</li>
                     <li>Click "Save Your Note".</li>
-                    <li>Right-click a note tab to rename it.</li>
                 </ol>
             </section>
 
@@ -79,15 +74,15 @@
                 <div class="grid">
                     <div class="card">
                         <h3>English</h3>
-                        <p>Focus on grammar, literature analysis, and essay structure.</p>
+                        <p>Focus on grammar and literature.</p>
                     </div>
                     <div class="card">
                         <h3>History</h3>
-                        <p>Learn about dates, events, and historical context.</p>
+                        <p>Learn about dates and events.</p>
                     </div>
                     <div class="card">
                         <h3>Science</h3>
-                        <p>Biology, Chemistry, and Physics concepts explained simply.</p>
+                        <p>Biology and Physics concepts.</p>
                     </div>
                 </div>
             </section>

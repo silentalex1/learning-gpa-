@@ -6,7 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiView = document.getElementById('aiView');
     const aiTitle = document.getElementById('aiTitle');
     
-    const mathMode = document.getElementById('mathMode');
+    const mathModeTrigger = document.getElementById('mathModeTrigger');
+    const mathModeOptions = document.getElementById('mathModeOptions');
+    let currentMathMode = 'algebra';
+
     const mathInput = document.getElementById('mathInput');
     const degreeBtn = document.getElementById('degreeBtn');
     const solveBtn = document.getElementById('solveMathBtn');
@@ -38,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileSuggestionBtn = document.getElementById('mobileSuggestionBtn');
     const suggestionModal = document.getElementById('suggestionModal');
     const closeSuggestionBtn = document.getElementById('closeSuggestionBtn');
-    const suggestionGenre = document.getElementById('suggestionGenre');
+    const suggestionGenreTrigger = document.getElementById('suggestionGenreTrigger');
+    const suggestionGenreOptions = document.getElementById('suggestionGenreOptions');
     const suggestionLabel = document.getElementById('suggestionLabel');
     const suggestionInput = document.getElementById('suggestionInput');
     const submitSuggestionBtn = document.getElementById('submitSuggestionBtn');
@@ -47,10 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileSettingsBtn = document.getElementById('mobileSettingsBtn');
     const settingsModal = document.getElementById('settingsModal');
     const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-    const siteTitleInput = document.getElementById('siteTitleInput');
-    const siteIconInput = document.getElementById('siteIconInput');
-    const mainHeaderTitle = document.getElementById('mainHeaderTitle');
-    const siteIconLink = document.getElementById('siteIcon');
+    const iconUpload = document.getElementById('iconUpload');
+    const fileNameDisplay = document.getElementById('fileName');
 
     const notesModal = document.getElementById('notesModal');
     const closeNotesBtn = document.getElementById('closeNotesBtn');
@@ -105,6 +107,95 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSidebarBtn.addEventListener('click', closeSidebar);
     sidebarOverlay.addEventListener('click', closeSidebar);
 
+    if (mathModeTrigger) {
+        mathModeTrigger.addEventListener('click', () => {
+            mathModeOptions.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('#mathModeOptions .custom-option').forEach(option => {
+            option.addEventListener('click', () => {
+                currentMathMode = option.dataset.value;
+                mathModeTrigger.textContent = option.textContent;
+                mathModeOptions.classList.add('hidden');
+                
+                solutionBox.innerHTML = '<div class="empty-state"><span>Answer and steps will appear here.</span></div>';
+                mathInput.innerHTML = '';
+                
+                if (currentMathMode.includes('triangle')) {
+                    graphCard.classList.add('hidden');
+                    mathInput.setAttribute('placeholder', "Ex: 35 and 58");
+                } else {
+                    graphCard.classList.remove('hidden');
+                    setTimeout(drawGrid, 10);
+                    if (currentMathMode === 'algebra') mathInput.setAttribute('placeholder', "Ex: 3(x+2) = 15 or 5 + 10 / 2");
+                    else if (currentMathMode === 'linear') mathInput.setAttribute('placeholder', "Ex: y = -x - 5");
+                    else if (currentMathMode === 'intercepts') mathInput.setAttribute('placeholder', "Ex: x-intercept 2, y-intercept 3");
+                    else if (currentMathMode === 'geometry') mathInput.setAttribute('placeholder', "Ex: (1,2) and (4,6)");
+                }
+            });
+        });
+    }
+
+    if (suggestionGenreTrigger) {
+        suggestionGenreTrigger.addEventListener('click', () => {
+            suggestionGenreOptions.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('#suggestionGenreOptions .custom-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const val = option.dataset.value;
+                suggestionGenreTrigger.textContent = val;
+                suggestionGenreOptions.classList.add('hidden');
+                
+                if(val === 'AI Features') {
+                    suggestionLabel.textContent = "What AI Features should be changed / added?";
+                    suggestionInput.placeholder = "what ai features should i add onto the site?";
+                } else if(val === 'Website changes') {
+                    suggestionLabel.textContent = "What Website changes should be changed / added?";
+                    suggestionInput.placeholder = "what should i change of the website design?";
+                } else {
+                    suggestionLabel.textContent = "What Geometry changes should be changed / added?";
+                    suggestionInput.placeholder = "what should i add onto this website for more geometry questions that will be more supported?";
+                }
+            });
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (mathModeTrigger && !mathModeTrigger.contains(e.target) && !mathModeOptions.contains(e.target)) {
+            mathModeOptions.classList.add('hidden');
+        }
+        if (suggestionGenreTrigger && !suggestionGenreTrigger.contains(e.target) && !suggestionGenreOptions.contains(e.target)) {
+            suggestionGenreOptions.classList.add('hidden');
+        }
+    });
+
+    mathInput.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const text = mathInput.textContent;
+            
+            const fractionMatch = text.match(/(\d+)\/(\d+)/);
+            if (fractionMatch) {
+                const fullStr = fractionMatch[0];
+                const num = fractionMatch[1];
+                const den = fractionMatch[2];
+                const fracHTML = `<span class="frac"><span>${num}</span><span class="symbol">/</span><span class="bottom">${den}</span></span>&nbsp;`;
+                
+                mathInput.innerHTML = mathInput.innerHTML.replace(fullStr, fracHTML);
+                
+                // Place cursor at end
+                const range = document.createRange();
+                range.selectNodeContents(mathInput);
+                range.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                e.preventDefault(); 
+            }
+        }
+    });
+
     function showNotification(message) {
         const notif = document.createElement('div');
         notif.className = 'notification';
@@ -155,51 +246,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if(mobileSuggestionBtn) mobileSuggestionBtn.addEventListener('click', openSuggestionModal);
     if(closeSuggestionBtn) closeSuggestionBtn.addEventListener('click', () => suggestionModal.classList.add('hidden'));
 
-    function openSettingsModal() {
-        if(settingsModal) {
-            settingsModal.classList.remove('hidden');
-            closeSidebar();
-        }
-    }
-
-    if(settingsBtn) settingsBtn.addEventListener('click', openSettingsModal);
-    if(mobileSettingsBtn) mobileSettingsBtn.addEventListener('click', openSettingsModal);
-    if(closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
-
-    if(siteTitleInput) {
-        siteTitleInput.addEventListener('input', (e) => {
-            const newVal = e.target.value || "Learning GPA.";
-            document.title = newVal;
-            if(mainHeaderTitle) mainHeaderTitle.textContent = newVal;
-        });
-    }
-
-    if(siteIconInput) {
-        siteIconInput.addEventListener('input', (e) => {
-            const newVal = e.target.value;
-            if(newVal && siteIconLink) siteIconLink.href = newVal;
-        });
-    }
-
-    if(suggestionGenre) {
-        suggestionGenre.addEventListener('change', () => {
-            const genre = suggestionGenre.value;
-            if(genre === 'AI Features') {
-                suggestionLabel.textContent = "What AI Features should be changed / added?";
-                suggestionInput.placeholder = "what ai features should i add onto the site?";
-            } else if(genre === 'Website changes') {
-                suggestionLabel.textContent = "What Website changes should be changed / added?";
-                suggestionInput.placeholder = "what should i change of the website design?";
-            } else {
-                suggestionLabel.textContent = "What Geometry changes should be changed / added?";
-                suggestionInput.placeholder = "what should i add onto this website for more geometry questions that will be more supported?";
-            }
-        });
-    }
-
     if(submitSuggestionBtn) {
         submitSuggestionBtn.addEventListener('click', async () => {
-            const genre = suggestionGenre.value;
+            const genre = suggestionGenreTrigger.textContent;
             const text = suggestionInput.value.trim();
             
             if (!text) {
@@ -238,6 +287,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function openSettings() {
+        settingsModal.classList.remove('hidden');
+        closeSidebar();
+    }
+
+    if(settingsBtn) settingsBtn.addEventListener('click', openSettings);
+    if(mobileSettingsBtn) mobileSettingsBtn.addEventListener('click', openSettings);
+    if(closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+    if(iconUpload) {
+        iconUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                fileNameDisplay.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dynamicFavicon = document.getElementById('dynamicFavicon');
+                    dynamicFavicon.href = e.target.result;
+                    showNotification("Website Icon Changed!");
+                    settingsModal.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
     async function checkAuth() {
         if (!window.puter) return;
         try {
@@ -273,8 +348,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if(loginBtn) loginBtn.addEventListener('click', handleAuth);
-    if(mobileLoginBtn) mobileLoginBtn.addEventListener('click', handleAuth);
+    loginBtn.addEventListener('click', handleAuth);
+    mobileLoginBtn.addEventListener('click', handleAuth);
 
     function openNotes() {
         if (!window.puter || !puter.auth.isSignedIn()) return;
@@ -439,39 +514,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if(mathMode) {
-        mathMode.addEventListener('change', () => {
-            solutionBox.innerHTML = '<div class="empty-state"><span>Answer and steps will appear here.</span></div>';
-            mathInput.value = '';
-            const mode = mathMode.value;
-
-            if (mode.includes('triangle')) {
-                graphCard.classList.add('hidden');
-                mathInput.placeholder = "Ex: 35 and 58";
-            } else if (mode === 'arithmetic') {
-                graphCard.classList.add('hidden');
-                mathInput.placeholder = "Ex: 8(5+v) or 4+2*8";
-            } else {
-                graphCard.classList.remove('hidden');
-                setTimeout(drawGrid, 10);
-                if (mode === 'linear') mathInput.placeholder = "Ex: y = -x - 5";
-                if (mode === 'intercepts') mathInput.placeholder = "Ex: x-intercept 2, y-intercept 3";
-                if (mode === 'geometry') mathInput.placeholder = "Ex: (1,2) and (4,6)";
-            }
-        });
-    }
-
     if(degreeBtn) {
         degreeBtn.addEventListener('click', () => {
-            mathInput.value += '°';
+            mathInput.textContent += '°';
             mathInput.focus();
         });
     }
 
     if(solveBtn) {
         solveBtn.addEventListener('click', () => {
-            const input = mathInput.value.toLowerCase().trim();
-            const mode = mathMode.value;
+            const input = mathInput.textContent.toLowerCase().trim();
             solutionBox.innerHTML = '';
 
             if (!input) {
@@ -480,56 +532,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                if (mode === 'arithmetic') solveArithmetic(input);
-                else if (mode === 'linear') solveLinear(input);
-                else if (mode === 'intercepts') solveIntercepts(input);
-                else if (mode === 'geometry') solveGeometry(input);
-                else if (mode === 'triangle_in') solveTriangleInterior(input);
-                else if (mode === 'triangle_ex') solveTriangleExterior(input);
+                if (currentMathMode === 'algebra') solveAlgebra(input);
+                else if (currentMathMode === 'linear') solveLinear(input);
+                else if (currentMathMode === 'intercepts') solveIntercepts(input);
+                else if (currentMathMode === 'geometry') solveGeometry(input);
+                else if (currentMathMode === 'triangle_in') solveTriangleInterior(input);
+                else if (currentMathMode === 'triangle_ex') solveTriangleExterior(input);
             } catch (e) {
                 solutionBox.innerHTML = `<span style="color:red"><strong>Error:</strong> ${e.message}</span>`;
             }
         });
-    }
-
-    function solveArithmetic(input) {
-        let clean = input.replace(/\s+/g, '');
-        
-        const distMatch = clean.match(/^(\d+)\((\d+)([+\-])([a-z])\)$/i) || clean.match(/^(\d+)\(([a-z])([+\-])(\d+)\)$/i);
-        if (distMatch) {
-            const factor = parseInt(distMatch[1]);
-            const isVarFirst = isNaN(parseInt(distMatch[2]));
-            const numVal = parseInt(isVarFirst ? distMatch[4] : distMatch[2]);
-            const variable = isVarFirst ? distMatch[2] : distMatch[4];
-            const op = distMatch[3];
-            
-            const term1 = factor * numVal;
-            const term2 = factor; 
-            
-            let result = `${term1} ${op} ${term2}${variable}`;
-            if(isVarFirst) result = `${term2}${variable} ${op} ${term1}`;
-            
-            let html = `<span class="step-header">Distributive Property</span>`;
-            html += `Formula: a(b + c) = ab + ac<br>`;
-            html += `Expand: ${factor} × ${numVal} ${op} ${factor} × ${variable}<br>`;
-            html += `<hr class="step-line">`;
-            html += `<strong>Final Answer: ${result}</strong>`;
-            solutionBox.innerHTML = html;
-            return;
-        }
-
-        try {
-            const safeExp = clean.replace(/[^0-9+\-*/().]/g, '');
-            const result = new Function('return ' + safeExp)();
-            
-            let html = `<span class="step-header">Evaluate Expression</span>`;
-            html += `Input: ${input}<br>`;
-            html += `<hr class="step-line">`;
-            html += `<strong>Final Answer: ${result}</strong>`;
-            solutionBox.innerHTML = html;
-        } catch(e) {
-            throw new Error("Invalid arithmetic expression.");
-        }
     }
 
     function cleanMathOutput(text) {
@@ -569,17 +581,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return cleanMathOutput(resp.message.content);
         } catch (e) {
             console.error(e);
-            if (e.message && e.message.includes("401")) {
-                await puter.auth.signOut();
-                return "Session expired. Please click Login again.";
-            }
-            return "Unable to connect to AI. Please try again.";
+            return "Unable to connect to AI. Please ensure you are logged in and connected to the internet.";
         }
     }
 
     if(solveMathAiBtn) {
         solveMathAiBtn.addEventListener('click', async () => {
-            const input = mathInput.value.trim();
+            const input = mathInput.textContent.trim();
             if (!input) {
                 solutionBox.innerHTML = '<span style="color:red">Please type a problem first.</span>';
                 return;
@@ -616,6 +624,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 aiResponse.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
             }
         });
+    }
+
+    function solveAlgebra(input) {
+        try {
+            const clean = input.replace(/[^0-9+\-*/().]/g, '');
+            if(!clean) throw new Error("Please enter a valid arithmetic expression.");
+            
+            const result = new Function('return ' + clean)();
+            let html = `<span class="step-header">Simplification</span>`;
+            html += `${clean} = <strong>${result}</strong>`;
+            solutionBox.innerHTML = html;
+        } catch(e) {
+            throw new Error("Invalid algebra expression.");
+        }
     }
 
     function solveTriangleExterior(input) {
@@ -699,6 +721,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 m = 0;
                 b = parseFloat(constMatch[1]);
             } else {
+                
+                if (clean.includes('x') && clean.includes('y')) {
+                     throw new Error("Please convert to Slope-Intercept form (y = mx + b) first.");
+                }
                 throw new Error("Format not recognized. Try y=mx+b");
             }
         }

@@ -650,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             aiResponse.innerHTML = '<span style="color:var(--primary)">Thinking...</span>';
 
-            let sysPrompt = "You are a helpful tutor. Do not use LaTeX. Use simple readable symbols.";
+            let sysPrompt = "You are a helpful tutor. Do not use LaTeX. Use simple readable symbols. Format headings with ##";
             if (currentSubject === 'math') sysPrompt = "You are a Math tutor. Be very precise. Solve step-by-step using simple words. No LaTeX.";
             if (currentSubject === 'english') sysPrompt = "You are an English tutor. Help with essays, grammar, and literature.";
             if (currentSubject === 'history') sysPrompt = "You are a History tutor. Explain context, dates, and events accurately.";

@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteNoteBtn = document.getElementById('deleteNoteBtn');
     const noteTitleInput = document.getElementById('noteTitleInput');
     const noteContentInput = document.getElementById('noteContentInput');
+    const boldTextBtn = document.getElementById('boldTextBtn');
     const notesTabs = document.getElementById('notesTabs');
     const contextMenu = document.getElementById('contextMenu');
     const renameNoteOption = document.getElementById('renameNoteOption');
@@ -324,6 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const dynamicFavicon = document.getElementById('dynamicFavicon');
                     dynamicFavicon.href = e.target.result;
                     showNotification("Website Icon Changed!");
+                    settingsModal.classList.add('hidden');
                 };
                 reader.readAsDataURL(file);
             }
@@ -380,6 +382,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if(closeNotesBtn) closeNotesBtn.addEventListener('click', () => notesModal.classList.add('hidden'));
 
     if(noteContentInput) {
+        const handleSelection = () => {
+            const selection = window.getSelection();
+            if (!selection.isCollapsed && noteContentInput.contains(selection.anchorNode)) {
+                boldTextBtn.classList.remove('hidden');
+            } else {
+                boldTextBtn.classList.add('hidden');
+            }
+        };
+
+        noteContentInput.addEventListener('mouseup', handleSelection);
+        noteContentInput.addEventListener('keyup', handleSelection);
+
+        boldTextBtn.addEventListener('click', () => {
+            document.execCommand('bold', false, null);
+            noteContentInput.focus();
+        });
+
         noteContentInput.addEventListener('paste', (e) => {
             e.preventDefault();
             let text = (e.clipboardData || window.clipboardData).getData('text/html') || (e.clipboardData || window.clipboardData).getData('text');

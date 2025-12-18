@@ -526,6 +526,8 @@ body {
 }
 .suggestion-textarea:focus { border-color: var(--primary); outline: none; }
 
+.left-align-text { text-align: left; }
+
 .center-btn-container { display: flex; justify-content: center; width: 100%; margin-top: 20px; }
 .center-btn-container .save-btn-styled { max-width: 250px; }
 

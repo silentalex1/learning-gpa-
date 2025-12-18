@@ -582,6 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function cleanMathOutput(text) {
         let cleaned = text
+            .replace(/^---$/gm, '<hr class="ai-line">')
             .replace(/\\\[/g, '') 
             .replace(/\\\]/g, '')
             .replace(/\\\(/g, '')
@@ -596,6 +597,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/\\angle/g, '∠')
             .replace(/\^\{?\\circ\}?/g, '°')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
             .replace(/\n/g, '<br>');
 
         cleaned = cleaned.replace(/(\d+)\/(\d+)/g, '<span class="frac"><span>$1</span><span class="symbol">/</span><span class="bottom">$2</span></span>');

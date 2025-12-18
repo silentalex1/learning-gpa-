@@ -184,9 +184,10 @@
                         
                         <div class="custom-select-container">
                             <div class="custom-select-trigger" id="mathModeTrigger">
-                                Algebra & Arithmetic (Simplify/Evaluate)
+                                Solve Any Algebra Question
                             </div>
                             <div class="custom-options hidden" id="mathModeOptions">
+                                <div class="custom-option" data-value="solve_any">Solve Any Algebra Question</div>
                                 <div class="custom-option" data-value="algebra">Algebra & Arithmetic (Simplify/Evaluate)</div>
                                 <div class="custom-option" data-value="linear">Linear Equation (y=mx+b)</div>
                                 <div class="custom-option" data-value="intercepts">Line from Intercepts</div>
@@ -200,7 +201,7 @@
                     <div class="form-group">
                         <label id="inputLabel" class="input-label">Enter Values</label>
                         <div class="input-group">
-                            <div id="mathInput" class="math-input-div" contenteditable="true" placeholder="y = -x - 5"></div>
+                            <div id="mathInput" class="math-input-div" contenteditable="true" placeholder="Enter problem..."></div>
                             <button id="degreeBtn" class="icon-btn" title="Add Degree Symbol">°</button>
                         </div>
                     </div>
@@ -236,7 +237,7 @@
             <section class="ai-panel card">
                 <div class="card-header">
                     <h2 id="aiTitle">Subject Helper</h2>
-                    <span class="ai-badge">Gemini AI</span>
+                    <span class="ai-badge">Puter AI</span>
                 </div>
                 
                 <div id="aiResponse" class="output-box ai-output">
@@ -246,7 +247,7 @@
                 </div>
                 
                 <div class="ai-input-area">
-                    <textarea id="aiPrompt" class="suggestion-textarea" placeholder="Type your question, essay, or concept here..."></textarea>
+                    <textarea id="aiPrompt" class="suggestion-textarea left-align-text" placeholder="Type your question, essay, or concept here..."></textarea>
                     <button id="askAiBtn" class="action-button ai-send">Ask AI</button>
                 </div>
             </section>

@@ -125,9 +125,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 solutionBox.innerHTML = '<div class="empty-state"><span>Answer and steps will appear here.</span></div>';
                 mathInput.innerHTML = '';
                 
-                if (currentMathMode.includes('triangle')) {
+                if (currentMathMode.includes('triangle') || currentMathMode === 'solve_any') {
                     graphCard.classList.add('hidden');
-                    mathInput.setAttribute('placeholder', "Ex: 35 and 58");
+                    if(currentMathMode === 'solve_any') mathInput.setAttribute('placeholder', "Type any algebra question...");
+                    else mathInput.setAttribute('placeholder', "Ex: 35 and 58");
                 } else {
                     graphCard.classList.remove('hidden');
                     setTimeout(drawGrid, 10);
@@ -558,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if(solveBtn) {
-        solveBtn.addEventListener('click', () => {
+        solveBtn.addEventListener('click', async () => {
             const input = mathInput.textContent.toLowerCase().trim();
             solutionBox.innerHTML = '';
 
@@ -568,7 +569,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                if (currentMathMode === 'algebra') solveAlgebra(input);
+                if (currentMathMode === 'solve_any') {
+                    solutionBox.innerHTML = '<span style="color:var(--primary)">Computing...</span>';
+                    const result = await callPuterAI(input, "You are a math solver. Output ONLY the final simplified answer or solution directly. No conversational filler.");
+                    solutionBox.innerHTML = result;
+                } else if (currentMathMode === 'algebra') solveAlgebra(input);
                 else if (currentMathMode === 'linear') solveLinear(input);
                 else if (currentMathMode === 'intercepts') solveIntercepts(input);
                 else if (currentMathMode === 'geometry') solveGeometry(input);

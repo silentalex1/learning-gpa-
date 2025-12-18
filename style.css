@@ -456,6 +456,8 @@ body {
 .note-input { font-weight: 800; font-size: 1.4rem; border: none; background: transparent; padding: 10px 0; color: #333; border-bottom: 2px solid transparent; transition: border 0.3s; }
 .note-input:focus { outline: none; border-bottom: 2px solid var(--primary); }
 
+.editor-container { position: relative; flex: 1; display: flex; flex-direction: column; }
+
 .note-content-area {
     flex: 1;
     min-height: 300px;
@@ -469,6 +471,29 @@ body {
     white-space: pre-wrap;
 }
 .note-content-area:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(0,0,0,0.05); }
+
+.bold-floating-btn {
+    position: absolute;
+    top: -40px;
+    right: 10px;
+    background: white;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-weight: 800;
+    border-radius: 8px;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 50;
+    font-family: serif;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s;
+}
+.bold-floating-btn:hover { background: var(--primary); color: white; }
 
 .note-actions { display: flex; gap: 15px; margin-top: 10px; }
 
@@ -614,4 +639,11 @@ body {
     .nav-btn:hover { transform: none; }
     .modal-body { padding: 20px; }
     .input-group { flex-wrap: nowrap; }
+    
+    .custom-option {
+        font-size: 0.9rem;
+        white-space: normal;
+        line-height: 1.4;
+        padding: 12px 15px;
+    }
 }

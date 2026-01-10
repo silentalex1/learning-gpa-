@@ -13,7 +13,10 @@
     <div id="notificationArea" class="notification-container"></div>
 
     <div id="contextMenu" class="context-menu hidden">
-        <div class="context-item" id="renameNoteOption">Rename Note</div>
+        <div class="context-item" id="renameNoteOption">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            <span>Rename Note</span>
+        </div>
     </div>
 
     <div id="settingsModal" class="modal hidden">
@@ -24,27 +27,27 @@
                 <button id="closeSettingsBtn" class="close-icon">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="input-label">Change Website Title</label>
-                    <input type="text" id="settingsTitleInput" class="styled-input" placeholder="New Title...">
-                </div>
-
-                <div class="form-group">
-                    <label class="input-label">Change Icon via URL</label>
-                    <input type="text" id="settingsIconUrlInput" class="styled-input" placeholder="https://example.com/image.png">
-                </div>
-
-                <div class="form-group">
-                    <label class="input-label">Or Upload Icon</label>
-                    <div class="file-upload-wrapper">
-                        <input type="file" id="iconUpload" accept="image/*" class="hidden-file-input">
-                        <label for="iconUpload" class="file-upload-label">
-                            <span id="fileName">Click to Upload Image</span>
-                        </label>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label class="input-label">Website Title</label>
+                        <input type="text" id="settingsTitleInput" class="styled-input" placeholder="New Title...">
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">Icon URL</label>
+                        <input type="text" id="settingsIconUrlInput" class="styled-input" placeholder="https://example.com/image.png">
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="input-label">Upload Custom Icon</label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="iconUpload" accept="image/*" class="hidden-file-input">
+                            <label for="iconUpload" class="file-upload-label">
+                                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                <span id="fileName">Drop an image here</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
-
-                <div class="center-btn-container">
+                <div class="modal-footer">
                     <button id="applySettingsBtn" class="save-btn-styled">Apply Changes</button>
                 </div>
             </div>
@@ -55,12 +58,12 @@
         <div class="modal-backdrop"></div>
         <div class="modal-card">
             <div class="modal-header">
-                <h2>Feature Suggestion</h2>
+                <h2>Send Feedback</h2>
                 <button id="closeSuggestionBtn" class="close-icon">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label class="input-label">Select genre:</label>
+                    <label class="input-label">Pick a category:</label>
                     <div class="custom-select-container">
                         <div class="custom-select-trigger" id="suggestionGenreTrigger">AI Features</div>
                         <div class="custom-options hidden" id="suggestionGenreOptions">
@@ -70,14 +73,12 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="form-group">
-                    <label id="suggestionLabel" class="input-label">What AI Features should be changed / added?</label>
-                    <textarea id="suggestionInput" class="suggestion-textarea" placeholder="Type your suggestion..."></textarea>
+                    <label id="suggestionLabel" class="input-label">What should be changed?</label>
+                    <textarea id="suggestionInput" class="suggestion-textarea" placeholder="Tell us your ideas..."></textarea>
                 </div>
-
-                <div class="center-btn-container">
-                    <button id="submitSuggestionBtn" class="save-btn-styled">Submit Suggestion</button>
+                <div class="modal-footer">
+                    <button id="submitSuggestionBtn" class="save-btn-styled">Send Suggestion</button>
                 </div>
             </div>
         </div>
@@ -87,26 +88,25 @@
         <div class="modal-backdrop"></div>
         <div class="modal-card notes-card">
             <div class="modal-header">
-                <h2>Your saved notes</h2>
+                <h2>Your Notebook</h2>
                 <button id="closeNotesBtn" class="close-icon">&times;</button>
             </div>
-            <div class="modal-body notes-body">
-                <div class="notes-tabs-container">
+            <div class="notes-layout">
+                <div class="notes-sidebar">
                     <div class="notes-tabs" id="notesTabs"></div>
                 </div>
-                <div class="note-editor">
-                    <label class="input-label">Enter your note title:</label>
-                    <input type="text" id="noteTitleInput" class="note-input" placeholder="Title...">
-                    
-                    <label class="input-label">Save your notes here:</label>
-                    <div class="editor-container">
-                        <button id="boldTextBtn" class="bold-floating-btn hidden">B</button>
+                <div class="notes-main">
+                    <div class="note-editor">
+                        <input type="text" id="noteTitleInput" class="note-input" placeholder="Note Title...">
+                        <div class="editor-toolbar">
+                            <button id="boldTextBtn" class="toolbar-btn"><b>B</b></button>
+                            <button id="italicTextBtn" class="toolbar-btn"><i>I</i></button>
+                        </div>
                         <div id="noteContentInput" class="note-content-area" contenteditable="true"></div>
-                    </div>
-                    
-                    <div class="note-actions">
-                        <button id="saveNoteBtn" class="save-btn-styled">Save Your Note</button>
-                        <button id="deleteNoteBtn" class="delete-btn hidden">Delete</button>
+                        <div class="note-actions">
+                            <button id="saveNoteBtn" class="save-btn-styled">Save Note</button>
+                            <button id="deleteNoteBtn" class="delete-btn hidden">Delete</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,147 +114,124 @@
     </div>
 
     <nav class="navbar">
-        <div class="nav-content">
-            <button id="mobileMenuBtn" class="mobile-menu-btn">
-                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            </button>
-            <div class="nav-links">
-                <button id="loginBtn" class="nav-item-btn">Login</button>
-                <button id="notesBtn" class="nav-item-btn hidden">Your Notes</button>
-                <button id="docsBtn" class="nav-item-btn">Docs</button>
-                <button id="suggestionBtn" class="nav-item-btn">Suggestion</button>
-                <button id="settingsBtn" class="nav-item-btn icon-only">⚙️</button>
-                <button id="discordBtn" class="nav-item-btn discord-btn">Discord</button>
-                <div id="userInfo" class="user-info hidden"></div>
-            </div>
+        <div class="nav-brand">Learning GPA.</div>
+        <div class="nav-links">
+            <button id="loginBtn" class="nav-pill">Login</button>
+            <button id="notesBtn" class="nav-pill hidden">My Notes</button>
+            <button id="docsBtn" class="nav-pill">Docs</button>
+            <button id="suggestionBtn" class="nav-pill">Ideas</button>
+            <button id="discordBtn" class="nav-pill discord">Discord</button>
+            <button id="settingsBtn" class="icon-pill">⚙️</button>
         </div>
+        <button id="mobileMenuBtn" class="mobile-toggle">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
     </nav>
 
     <div id="mobileSidebar" class="sidebar">
         <div class="sidebar-header">
-            <h3>Menu</h3>
+            <h3>Navigation</h3>
             <button id="closeSidebarBtn" class="close-icon">&times;</button>
         </div>
-        <div class="sidebar-content">
-            <button id="mobileLoginBtn" class="sidebar-btn">Login</button>
-            <button id="mobileNotesBtn" class="sidebar-btn hidden">Your Notes</button>
-            <button id="mobileDocsBtn" class="sidebar-btn">Docs</button>
-            <button id="mobileSuggestionBtn" class="sidebar-btn">Suggestion</button>
-            <button id="mobileSettingsBtn" class="sidebar-btn">Settings</button>
-            <button id="mobileDiscordBtn" class="sidebar-btn discord-btn">Discord</button>
+        <div class="sidebar-links">
+            <button id="mobileLoginBtn" class="sidebar-item">Login</button>
+            <button id="mobileNotesBtn" class="sidebar-item hidden">My Notes</button>
+            <button id="mobileDocsBtn" class="sidebar-item">Docs</button>
+            <button id="mobileSuggestionBtn" class="sidebar-item">Ideas</button>
+            <button id="mobileSettingsBtn" class="sidebar-item">Settings</button>
+            <button id="mobileDiscordBtn" class="sidebar-item discord">Discord</button>
         </div>
     </div>
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-    <header class="header">
-        <div class="header-content">
-            <div class="logo-section">
-                <h1>Learning GPA.</h1>
-                <p>Able to bring your "F" grade to a "A" pretty easily.</p>
-            </div>
+    <header class="main-header">
+        <div class="hero-text">
+            <h1>Learning GPA<span>.</span></h1>
+            <p>Able to bring your "F" grade to a "A" pretty easily.</p>
         </div>
-        
-        <nav class="subject-nav">
-            <button class="nav-btn active" data-subject="math">
-                <span class="emoji">📐</span> Math
-            </button>
-            <button class="nav-btn" data-subject="english">
-                <span class="emoji">📚</span> English
-            </button>
-            <button class="nav-btn" data-subject="history">
-                <span class="emoji">⚗️</span> History
-            </button>
-            <button class="nav-btn" data-subject="science">
-                <span class="emoji">🧬</span> Science
-            </button>
-        </nav>
+        <div class="subject-bar">
+            <button class="subj-btn active" data-subject="math">📐 Math</button>
+            <button class="subj-btn" data-subject="english">📚 English</button>
+            <button class="subj-btn" data-subject="history">📜 History</button>
+            <button class="subj-btn" data-subject="science">🧪 Science</button>
+        </div>
     </header>
 
-    <main class="container">
-        <div id="mathView" class="view-section">
-            <div class="layout-grid">
-                <section class="control-panel card">
-                    <div class="card-header">
-                        <h2>Input Problem</h2>
+    <main class="content-wrapper">
+        <div id="mathView" class="tab-view">
+            <div class="dashboard-grid">
+                <aside class="tool-sidebar">
+                    <div class="glass-card">
+                        <h3>Input Problem</h3>
+                        <div class="form-group">
+                            <label class="input-label">Problem Category</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" id="mathModeTrigger">Solve Any Question</div>
+                                <div class="custom-options hidden" id="mathModeOptions">
+                                    <div class="custom-option" data-value="solve_any">Solve Any Question</div>
+                                    <div class="custom-option" data-value="algebra">Algebra & Math</div>
+                                    <div class="custom-option" data-value="linear">Linear Equation (y=mx+b)</div>
+                                    <div class="custom-option" data-value="intercepts">Line from Intercepts</div>
+                                    <div class="custom-option" data-value="geometry">Geometry (2 Points)</div>
+                                    <div class="custom-option" data-value="triangle_in">Triangle (Interior)</div>
+                                    <div class="custom-option" data-value="triangle_ex">Triangle (Exterior)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="input-label">Your Values</label>
+                            <div class="math-input-wrapper">
+                                <div id="mathInput" class="math-editable" contenteditable="true"></div>
+                                <button id="degreeBtn" class="math-symbol-btn">°</button>
+                            </div>
+                        </div>
+                        <button id="solveMathBtn" class="primary-btn">Get My Answer</button>
+                        <button id="solveMathAiBtn" class="ai-glow-btn">Use AI Solver</button>
+                    </div>
+                </aside>
+
+                <section class="display-area">
+                    <div class="glass-card solution-card">
+                        <div class="card-header">
+                            <h3>Precise Solution</h3>
+                        </div>
+                        <div id="mathSolution" class="solution-output">
+                            <div class="placeholder-msg">Your step-by-step answer will appear here.</div>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label class="input-label">Select Problem Type</label>
-                        <div class="custom-select-container">
-                            <div class="custom-select-trigger" id="mathModeTrigger">
-                                Solve Any Algebra Question
-                            </div>
-                            <div class="custom-options hidden" id="mathModeOptions">
-                                <div class="custom-option" data-value="solve_any">Solve Any Algebra Question</div>
-                                <div class="custom-option" data-value="algebra">Algebra & Arithmetic (Simplify/Evaluate)</div>
-                                <div class="custom-option" data-value="linear">Linear Equation (y=mx+b)</div>
-                                <div class="custom-option" data-value="intercepts">Line from Intercepts</div>
-                                <div class="custom-option" data-value="geometry">Geometry (2 Points)</div>
-                                <div class="custom-option" data-value="triangle_in">Triangle (Find 3rd Angle)</div>
-                                <div class="custom-option" data-value="triangle_ex">Triangle (Find Exterior Angle)</div>
-                            </div>
+                    <div id="graphCard" class="glass-card graph-card">
+                        <div class="card-header">
+                            <h3>Math Graph</h3>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="mathCanvas" width="800" height="500"></canvas>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label id="inputLabel" class="input-label">Enter Values</label>
-                        <div class="input-group">
-                            <div id="mathInput" class="math-input-div" contenteditable="true" placeholder="Enter problem..."></div>
-                            <button id="degreeBtn" class="icon-btn" title="Add Degree Symbol">°</button>
-                        </div>
-                    </div>
-                    <button id="solveMathBtn" class="action-button">Get My Answer</button>
-                    <button id="solveMathAiBtn" class="action-button ai-btn">Get my Answer with AI</button>
                 </section>
-
-                <div class="right-col">
-                    <section class="results-area card">
-                        <div class="card-header">
-                            <h2>Precise Solution</h2>
-                        </div>
-                        <div id="mathSolution" class="output-box">
-                            <div class="empty-state">
-                                <span>Answer and steps will appear here.</span>
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <section id="graphCard" class="graph-section card">
-                        <div class="card-header">
-                            <h2>Visual Graph</h2>
-                        </div>
-                        <div class="canvas-wrapper">
-                            <canvas id="mathCanvas" width="600" height="400"></canvas>
-                        </div>
-                    </section>
-                </div>
             </div>
         </div>
 
-        <div id="aiView" class="view-section hidden">
-            <section class="ai-panel card">
-                <div class="card-header">
-                    <h2 id="aiTitle">Subject Helper</h2>
-                    <span class="ai-badge">Puter AI</span>
-                </div>
-                
-                <div id="aiResponse" class="output-box ai-output">
-                    <div class="empty-state">
-                        <span>I am ready to help. Ask me anything about this subject.</span>
+        <div id="aiView" class="tab-view hidden">
+            <div class="ai-chat-container">
+                <div class="glass-card ai-interface">
+                    <div class="ai-header">
+                        <h2 id="aiTitle">Math Helper</h2>
+                        <div class="status-badge">AI Active</div>
+                    </div>
+                    <div id="aiResponse" class="ai-history">
+                        <div class="placeholder-msg">I am ready to help. Ask me anything about this subject.</div>
+                    </div>
+                    <div class="ai-controls">
+                        <textarea id="aiPrompt" placeholder="Ask a question or paste an essay prompt..."></textarea>
+                        <button id="askAiBtn" class="ai-send-btn">
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
                     </div>
                 </div>
-                
-                <div class="ai-input-area">
-                    <textarea id="aiPrompt" class="suggestion-textarea left-align-text" placeholder="Type your question, essay, or concept here..."></textarea>
-                    <button id="askAiBtn" class="action-button ai-send">Ask AI</button>
-                </div>
-            </section>
+            </div>
         </div>
     </main>
-
-    <footer class="site-footer">
-        <p>&copy; 2024 Learning GPA. All rights reserved.</p>
-    </footer>
 
     <script src="script.js"></script>
 </body>

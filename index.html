@@ -13,39 +13,46 @@
     <div id="notificationArea" class="notification-container"></div>
 
     <div id="contextMenu" class="context-menu hidden">
-        <div class="context-item" id="renameNoteOption">Rename Note</div>
+        <div class="context-item" id="renameNoteOption">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            <span>Rename Note</span>
+        </div>
     </div>
 
     <div id="settingsModal" class="modal hidden">
         <div class="modal-backdrop"></div>
         <div class="modal-card suggestion-card">
             <div class="modal-header">
-                <h2>Settings</h2>
+                <div class="header-title-group">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <h2>Platform Settings</h2>
+                </div>
                 <button id="closeSettingsBtn" class="close-icon">&times;</button>
             </div>
             <div class="modal-body suggestion-body">
                 <div class="form-group">
-                    <label class="input-label">Change Website Title</label>
-                    <input type="text" id="settingsTitleInput" class="styled-input" placeholder="New Title...">
+                    <label class="input-label">Identity Title</label>
+                    <input type="text" id="settingsTitleInput" class="styled-input" placeholder="Enter custom site title...">
                 </div>
 
                 <div class="form-group">
-                    <label class="input-label">Change Icon via URL</label>
-                    <input type="text" id="settingsIconUrlInput" class="styled-input" placeholder="https://example.com/image.png">
+                    <label class="input-label">Icon Identifier (URL)</label>
+                    <input type="text" id="settingsIconUrlInput" class="styled-input" placeholder="https://resource.com/icon.png">
                 </div>
 
                 <div class="form-group">
-                    <label class="input-label">Or Upload Icon</label>
+                    <label class="input-label">Local Asset Upload</label>
                     <div class="file-upload-wrapper">
                         <input type="file" id="iconUpload" accept="image/*" class="hidden-file-input">
                         <label for="iconUpload" class="file-upload-label">
-                            <span id="fileName">Click to Upload Image</span>
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <span id="fileName">Select Brand Image</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="center-btn-container">
-                    <button id="applySettingsBtn" class="save-btn-styled">Apply Changes</button>
+                    <button id="applySettingsBtn" class="save-btn-styled">Synchronize Changes</button>
                 </div>
             </div>
         </div>
@@ -55,29 +62,32 @@
         <div class="modal-backdrop"></div>
         <div class="modal-card suggestion-card">
             <div class="modal-header">
-                <h2>Feature Suggestion</h2>
+                <div class="header-title-group">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <h2>Feedback & Development</h2>
+                </div>
                 <button id="closeSuggestionBtn" class="close-icon">&times;</button>
             </div>
             <div class="modal-body suggestion-body">
                 <div class="form-group">
-                    <label class="input-label">Select genre:</label>
+                    <label class="input-label">Inquiry Classification:</label>
                     <div class="custom-select-container">
-                        <div class="custom-select-trigger" id="suggestionGenreTrigger">AI Features</div>
+                        <div class="custom-select-trigger" id="suggestionGenreTrigger">Intelligence Features</div>
                         <div class="custom-options hidden" id="suggestionGenreOptions">
-                            <div class="custom-option" data-value="AI Features">AI Features</div>
-                            <div class="custom-option" data-value="Website changes">Website changes</div>
-                            <div class="custom-option" data-value="Geometry changes">Geometry changes</div>
+                            <div class="custom-option" data-value="AI Features">Intelligence Features</div>
+                            <div class="custom-option" data-value="Website changes">Interface Architecture</div>
+                            <div class="custom-option" data-value="Geometry changes">Geometry Logic</div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label id="suggestionLabel" class="input-label">What AI Features should be changed / added?</label>
-                    <textarea id="suggestionInput" class="suggestion-textarea" placeholder="Type your suggestion..."></textarea>
+                    <label id="suggestionLabel" class="input-label">Detailed Description</label>
+                    <textarea id="suggestionInput" class="suggestion-textarea" placeholder="Provide technical feedback or requested updates..."></textarea>
                 </div>
 
                 <div class="center-btn-container">
-                    <button id="submitSuggestionBtn" class="save-btn-styled">Submit Suggestion</button>
+                    <button id="submitSuggestionBtn" class="save-btn-styled">Dispatch Suggestion</button>
                 </div>
             </div>
         </div>
@@ -87,7 +97,10 @@
         <div class="modal-backdrop"></div>
         <div class="modal-card notes-card">
             <div class="modal-header">
-                <h2>Your saved notes</h2>
+                <div class="header-title-group">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <h2>Scholar Notebook</h2>
+                </div>
                 <button id="closeNotesBtn" class="close-icon">&times;</button>
             </div>
             <div class="modal-body notes-body">
@@ -95,18 +108,22 @@
                     <div class="notes-tabs" id="notesTabs"></div>
                 </div>
                 <div class="note-editor">
-                    <label class="input-label">Enter your note title:</label>
-                    <input type="text" id="noteTitleInput" class="note-input" placeholder="Title...">
+                    <div class="editor-header">
+                        <input type="text" id="noteTitleInput" class="note-input" placeholder="Session Title...">
+                    </div>
                     
-                    <label class="input-label">Save your notes here:</label>
                     <div class="editor-container">
-                        <button id="boldTextBtn" class="bold-floating-btn hidden">B</button>
+                        <div class="editor-toolbar">
+                            <button id="boldTextBtn" class="toolbar-btn" title="Bold Text">B</button>
+                            <button id="italicTextBtn" class="toolbar-btn" style="font-style: italic;" title="Italic Text">I</button>
+                            <button id="underlineTextBtn" class="toolbar-btn" style="text-decoration: underline;" title="Underline Text">U</button>
+                        </div>
                         <div id="noteContentInput" class="note-content-area" contenteditable="true"></div>
                     </div>
                     
                     <div class="note-actions">
-                        <button id="saveNoteBtn" class="save-btn-styled">Save Your Note</button>
-                        <button id="deleteNoteBtn" class="delete-btn hidden">Delete</button>
+                        <button id="saveNoteBtn" class="save-btn-styled">Commit to Memory</button>
+                        <button id="deleteNoteBtn" class="delete-btn hidden">Archive</button>
                     </div>
                 </div>
             </div>
@@ -118,13 +135,16 @@
             <button id="mobileMenuBtn" class="mobile-menu-btn">
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
+            <div class="nav-brand">Learning GPA.</div>
             <div class="nav-links">
-                <button id="loginBtn" class="nav-item-btn">Login</button>
-                <button id="notesBtn" class="nav-item-btn hidden">Your Notes</button>
-                <button id="docsBtn" class="nav-item-btn">Docs</button>
-                <button id="suggestionBtn" class="nav-item-btn">Suggestion</button>
-                <button id="settingsBtn" class="nav-item-btn icon-only">⚙️</button>
-                <button id="discordBtn" class="nav-item-btn discord-btn">Discord</button>
+                <button id="loginBtn" class="nav-item-btn secondary">Access Account</button>
+                <button id="notesBtn" class="nav-item-btn hidden">Notebook</button>
+                <button id="docsBtn" class="nav-item-btn">Documentation</button>
+                <button id="suggestionBtn" class="nav-item-btn">Feedback</button>
+                <button id="settingsBtn" class="nav-icon-btn" title="Settings">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
+                <button id="discordBtn" class="nav-item-btn discord-btn">Community</button>
                 <div id="userInfo" class="user-info hidden"></div>
             </div>
         </div>
@@ -132,16 +152,16 @@
 
     <div id="mobileSidebar" class="sidebar">
         <div class="sidebar-header">
-            <h3>Menu</h3>
+            <h3>Navigation</h3>
             <button id="closeSidebarBtn" class="close-icon">&times;</button>
         </div>
         <div class="sidebar-content">
-            <button id="mobileLoginBtn" class="sidebar-btn">Login</button>
-            <button id="mobileNotesBtn" class="sidebar-btn hidden">Your Notes</button>
-            <button id="mobileDocsBtn" class="sidebar-btn">Docs</button>
-            <button id="mobileSuggestionBtn" class="sidebar-btn">Suggestion</button>
-            <button id="mobileSettingsBtn" class="sidebar-btn">Settings</button>
-            <button id="mobileDiscordBtn" class="sidebar-btn discord-btn">Discord</button>
+            <button id="mobileLoginBtn" class="sidebar-btn">Account Access</button>
+            <button id="mobileNotesBtn" class="sidebar-btn hidden">Notebook</button>
+            <button id="mobileDocsBtn" class="sidebar-btn">Documentation</button>
+            <button id="mobileSuggestionBtn" class="sidebar-btn">Feedback</button>
+            <button id="mobileSettingsBtn" class="sidebar-btn">Preferences</button>
+            <button id="mobileDiscordBtn" class="sidebar-btn discord-btn">Community Hub</button>
         </div>
     </div>
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
@@ -150,7 +170,7 @@
         <div class="header-content">
             <div class="logo-section">
                 <h1>Learning GPA.</h1>
-                <p>Able to bring your "F" grade to a "A" pretty easily.</p>
+                <p>A comprehensive academic ecosystem designed to transform performance from standard to superior.</p>
             </div>
         </div>
         
@@ -162,10 +182,10 @@
                 <span class="emoji">📚</span> English
             </button>
             <button class="nav-btn" data-subject="history">
-                <span class="emoji">⚗️</span> History
+                <span class="emoji">🏛️</span> History
             </button>
             <button class="nav-btn" data-subject="science">
-                <span class="emoji">🧬</span> Science
+                <span class="emoji">🔬</span> Science
             </button>
         </nav>
     </header>
@@ -176,54 +196,72 @@
             <div class="layout-grid">
                 <section class="control-panel card">
                     <div class="card-header">
-                        <h2>Input Problem</h2>
+                        <h2>Input Processor</h2>
+                        <span class="card-badge">Precision</span>
                     </div>
                     
                     <div class="form-group">
-                        <label class="input-label">Select Problem Type</label>
+                        <label class="input-label">Algorithm selection</label>
                         
                         <div class="custom-select-container">
                             <div class="custom-select-trigger" id="mathModeTrigger">
-                                Solve Any Algebra Question
+                                General Algebra Logic
                             </div>
                             <div class="custom-options hidden" id="mathModeOptions">
-                                <div class="custom-option" data-value="solve_any">Solve Any Algebra Question</div>
-                                <div class="custom-option" data-value="algebra">Algebra & Arithmetic (Simplify/Evaluate)</div>
-                                <div class="custom-option" data-value="linear">Linear Equation (y=mx+b)</div>
-                                <div class="custom-option" data-value="intercepts">Line from Intercepts</div>
-                                <div class="custom-option" data-value="geometry">Geometry (2 Points)</div>
-                                <div class="custom-option" data-value="triangle_in">Triangle (Find 3rd Angle)</div>
-                                <div class="custom-option" data-value="triangle_ex">Triangle (Find Exterior Angle)</div>
+                                <div class="custom-option" data-value="solve_any">General Algebra Logic</div>
+                                <div class="custom-option" data-value="algebra">Expression Simplification</div>
+                                <div class="custom-option" data-value="linear">Linear Relations (y=mx+b)</div>
+                                <div class="custom-option" data-value="intercepts">Linear Intercepts</div>
+                                <div class="custom-option" data-value="geometry">Coordinate Geometry</div>
+                                <div class="custom-option" data-value="triangle_in">Interior Angle Sum</div>
+                                <div class="custom-option" data-value="triangle_ex">Exterior Angle Logic</div>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label id="inputLabel" class="input-label">Enter Values</label>
+                        <label id="inputLabel" class="input-label">Data Entry</label>
                         <div class="input-group">
-                            <div id="mathInput" class="math-input-div" contenteditable="true" placeholder="Enter problem..."></div>
-                            <button id="degreeBtn" class="icon-btn" title="Add Degree Symbol">°</button>
+                            <div id="mathInput" class="math-input-div" contenteditable="true" data-placeholder="e.g. 5x + 10 = 20"></div>
+                            <button id="degreeBtn" class="icon-btn" title="Insert Degree Symbol">°</button>
                         </div>
                     </div>
-                    <button id="solveMathBtn" class="action-button">Get My Answer</button>
-                    <button id="solveMathAiBtn" class="action-button ai-btn">Get my Answer with AI</button>
+                    
+                    <div class="button-stack">
+                        <button id="solveMathBtn" class="action-button primary">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            Compute Result
+                        </button>
+                        <button id="solveMathAiBtn" class="action-button ai-btn">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                            Intelligence Solution
+                        </button>
+                    </div>
                 </section>
 
                 <div class="right-col">
                     <section class="results-area card">
                         <div class="card-header">
-                            <h2>Precise Solution</h2>
+                            <h2>Solution Breakdown</h2>
+                            <button class="utility-btn" id="copyResultBtn" title="Copy Solution">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            </button>
                         </div>
                         <div id="mathSolution" class="output-box">
                             <div class="empty-state">
-                                <span>Answer and steps will appear here.</span>
+                                <div class="empty-icon">∫</div>
+                                <span>Analytical output will materialize here upon processing.</span>
                             </div>
                         </div>
                     </section>
                     
                     <section id="graphCard" class="graph-section card">
                         <div class="card-header">
-                            <h2>Visual Graph</h2>
+                            <h2>Geometric Projection</h2>
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" id="zoomOut">-</button>
+                                <button class="zoom-btn" id="zoomIn">+</button>
+                            </div>
                         </div>
                         <div class="canvas-wrapper">
                             <canvas id="mathCanvas" width="600" height="400"></canvas>
@@ -236,19 +274,23 @@
         <div id="aiView" class="view-section hidden">
             <section class="ai-panel card">
                 <div class="card-header">
-                    <h2 id="aiTitle">Subject Helper</h2>
-                    <span class="ai-badge">Puter AI</span>
+                    <h2 id="aiTitle">Academic Assistant</h2>
+                    <span class="ai-badge">Puter Logic</span>
                 </div>
                 
                 <div id="aiResponse" class="output-box ai-output">
                     <div class="empty-state">
-                        <span>I am ready to help. Ask me anything about this subject.</span>
+                        <div class="empty-icon">✦</div>
+                        <span>Standing by for academic inquiries in this field.</span>
                     </div>
                 </div>
                 
                 <div class="ai-input-area">
-                    <textarea id="aiPrompt" class="suggestion-textarea left-align-text" placeholder="Type your question, essay, or concept here..."></textarea>
-                    <button id="askAiBtn" class="action-button ai-send">Ask AI</button>
+                    <textarea id="aiPrompt" class="suggestion-textarea" placeholder="Enter inquiry, concept request, or draft for analysis..."></textarea>
+                    <button id="askAiBtn" class="action-button ai-send">
+                        <span>Dispatch Query</span>
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
                 </div>
             </section>
         </div>

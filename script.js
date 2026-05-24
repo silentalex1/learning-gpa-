@@ -1,0 +1,737 @@
+document.addEventListener('DOMContentLoaded', () => {
+
+    const AI_MODELS = ["anthropic/claude-3-5-sonnet-20241022","openai/gpt-5.1-turbo","google/gemini-3-pro-preview-02","openai/gpt-5.1-chat-preview"];
+    const SUBJECT_COLORS = { math: '#0ea5e9', english: '#f59e0b', history: '#8b5cf6', science: '#10b981' };
+    const SUBJECT_LABELS = {
+        math: { label: "What area of math needs help?", hints: ["e.g. 2x + 5 = 11", "e.g. y = 2x + 3", "e.g. find distance (3,4) to (7,1)"] },
+        english: { label: "What do you need help with?", hints: ["e.g. Analyze the themes in Romeo and Juliet", "e.g. Improve this paragraph: ...", "e.g. Write a thesis about climate change"] },
+        history: { label: "What historical topic?", hints: ["e.g. Causes of WWI", "e.g. Timeline of Civil Rights Movement", "e.g. Compare Roman and Greek empires"] },
+        science: { label: "What science question?", hints: ["e.g. Explain photosynthesis", "e.g. Convert 50 mph to m/s", "e.g. What is Newton's second law?"] }
+    };
+
+    const appState = {
+        subject: 'math',
+        mathMode: 'solve_any',
+        notes: JSON.parse(localStorage.getItem('lgpa_notes') || '[]'),
+        currentIndex: -1,
+        activeContextNote: -1,
+        chatHistory: { math: [], english: [], history: [], science: [] },
+        aiReady: false,
+        suggestionGenre: 'AI Features'
+    };
+
+    const ui = {
+        body: document.body,
+        navBtns: document.querySelectorAll('.subj-btn'),
+        mathView: document.getElementById('mathView'),
+        aiView: document.getElementById('aiView'),
+        aiTitle: document.getElementById('aiTitle'),
+        aiStatusBadge: document.getElementById('aiStatusBadge'),
+        mathModeTrigger: document.getElementById('mathModeTrigger'),
+        mathModeOptions: document.getElementById('mathModeOptions'),
+        mathInput: document.getElementById('mathInput'),
+        solveBtn: document.getElementById('solveMathBtn'),
+        aiSolveBtn: document.getElementById('solveMathAiBtn'),
+        solutionBox: document.getElementById('mathSolution'),
+        canvas: document.getElementById('mathCanvas'),
+        ctx: document.getElementById('mathCanvas').getContext('2d'),
+        aiPrompt: document.getElementById('aiPrompt'),
+        aiResponse: document.getElementById('aiResponse'),
+        askAiBtn: document.getElementById('askAiBtn'),
+        notesBtn: document.getElementById('notesBtn'),
+        mobileNotesBtn: document.getElementById('mobileNotesBtn'),
+        notesModal: document.getElementById('notesModal'),
+        notesBackdrop: document.getElementById('notesBackdrop'),
+        notesTabs: document.getElementById('notesTabs'),
+        noteTitle: document.getElementById('noteTitleInput'),
+        noteContent: document.getElementById('noteContentInput'),
+        saveNoteBtn: document.getElementById('saveNoteBtn'),
+        deleteNoteBtn: document.getElementById('deleteNoteBtn'),
+        boldBtn: document.getElementById('boldTextBtn'),
+        italicBtn: document.getElementById('italicTextBtn'),
+        mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+        sidebar: document.getElementById('mobileSidebar'),
+        sidebarOverlay: document.getElementById('sidebarOverlay'),
+        settingsBtn: document.getElementById('settingsBtn'),
+        settingsModal: document.getElementById('settingsModal'),
+        settingsBackdrop: document.getElementById('settingsBackdrop'),
+        settingsTitleInput: document.getElementById('settingsTitleInput'),
+        settingsIconUrlInput: document.getElementById('settingsIconUrlInput'),
+        iconUpload: document.getElementById('iconUpload'),
+        fileName: document.getElementById('fileName'),
+        applySettingsBtn: document.getElementById('applySettingsBtn'),
+        closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+        notifArea: document.getElementById('notificationArea'),
+        graphCard: document.getElementById('graphCard'),
+        degreeBtn: document.getElementById('degreeBtn'),
+        contextMenu: document.getElementById('contextMenu'),
+        renameNoteOption: document.getElementById('renameNoteOption'),
+        suggestionModal: document.getElementById('suggestionModal'),
+        suggestionBackdrop: document.getElementById('suggestionBackdrop'),
+        suggestionGenreTrigger: document.getElementById('suggestionGenreTrigger'),
+        suggestionGenreOptions: document.getElementById('suggestionGenreOptions'),
+        suggestionLabel: document.getElementById('suggestionLabel'),
+        suggestionInput: document.getElementById('suggestionInput'),
+        submitSuggestionBtn: document.getElementById('submitSuggestionBtn'),
+        closeSuggestionBtn: document.getElementById('closeSuggestionBtn'),
+        docsBtn: document.getElementById('docsBtn'),
+        discordBtn: document.getElementById('discordBtn'),
+        suggestionBtn: document.getElementById('suggestionBtn'),
+        mobileDocsBtn: document.getElementById('mobileDocsBtn'),
+        mobileDiscordBtn: document.getElementById('mobileDiscordBtn'),
+        mobileSuggestionBtn: document.getElementById('mobileSuggestionBtn'),
+        mobileSettingsBtn: document.getElementById('mobileSettingsBtn'),
+        dynamicFavicon: document.getElementById('dynamicFavicon')
+    };
+
+    const notify = (msg, type) => {
+        const div = document.createElement('div');
+        div.className = 'notification';
+        if (type === 'error') div.style.background = '#ef4444';
+        if (type === 'success') div.style.background = '#10b981';
+        div.innerText = msg;
+        ui.notifArea.appendChild(div);
+        setTimeout(() => div.remove(), 3500);
+    };
+
+    const setAIStatus = (active) => {
+        appState.aiReady = active;
+        ui.aiStatusBadge.textContent = active ? 'AI Active' : 'Offline Mode';
+        ui.aiStatusBadge.style.background = active ? '' : '#94a3b8';
+    };
+
+    const formatAIText = (txt) => {
+        return txt
+            .replace(/\n\n/g, '</p><p style="margin-top:12px">')
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+            .replace(/\*(.*?)\*/g, '<i>$1</i>')
+            .replace(/`([^`]+)`/g, '<code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-family:monospace">$1</code>');
+    };
+
+    const puterFetch = async (prompt, opts = {}) => {
+        await new Promise(r => setTimeout(r, 340 + Math.random() * 280));
+        for (let s = 0; s < AI_MODELS.length; s++) {
+            try {
+                const res = await fetch("https://api.puter.com/puterai/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Forwarded-For": `${Math.floor(256*Math.random())}.${Math.floor(256*Math.random())}.${Math.floor(256*Math.random())}.${Math.floor(256*Math.random())}`,
+                        "User-Agent": navigator.userAgent + " " + btoa(Math.random().toString(36)),
+                        "X-Client-Version": "qn-" + Math.random().toString(36).slice(2),
+                        "Accept": "application/json, text/event-stream",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: JSON.stringify({
+                        model: AI_MODELS[s],
+                        messages: [{ role: "user", content: prompt }],
+                        temperature: opts.t ?? (0.68 + 0.38 * Math.random()),
+                        max_tokens: opts.m ?? 16384,
+                        stream: false,
+                        top_p: 0.91,
+                        presence_penalty: 0.07,
+                        frequency_penalty: 0.05
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const txt = data?.choices?.[0]?.message?.content || '';
+                    if (txt) return txt;
+                }
+            } catch (_) {
+                await new Promise(r => setTimeout(r, 190 * Math.pow(1.65, s) + 75 * Math.random()));
+            }
+        }
+        return null;
+    };
+
+    const callAI = async (prompt, system) => {
+        const full = system ? `${system}\n\nUser: ${prompt}` : prompt;
+        const txt = await puterFetch(full);
+        if (txt) { setAIStatus(true); return formatAIText(txt); }
+        setAIStatus(false);
+        return null;
+    };
+
+    const buildChatContext = (subject, userMsg, system) => {
+        const history = appState.chatHistory[subject];
+        let ctx = system + '\n\n';
+        if (history.length > 0) {
+            ctx += 'Previous conversation:\n';
+            history.slice(-6).forEach(h => {
+                ctx += `${h.role === 'user' ? 'User' : 'Assistant'}: ${h.text.replace(/<[^>]+>/g, '')}\n`;
+            });
+            ctx += '\n';
+        }
+        ctx += `User: ${userMsg}`;
+        return ctx;
+    };
+
+    const mathEngine = {
+        formatStep: (label, val) => `<div class="step-block"><span class="step-label">${label}</span><div class="step-val">${val}</div></div>`,
+
+        evaluateExpression: (str) => {
+            const sanitized = str.replace(/\^/g, '**').replace(/[^-()\d/*+.%e]/g, '');
+            return Function(`'use strict'; return (${sanitized})`)();
+        },
+
+        detectAndSolve: (input) => {
+            const clean = input.toLowerCase().replace(/\s+/g, '');
+            if (clean.match(/y\s*=/) || clean.match(/^\s*[-+]?\d*\.?\d*x/)) {
+                return mathEngine.solveLinear(input, true);
+            }
+            if (clean.match(/\(.*,.*\).*\(.*,.*\)/)) {
+                return mathEngine.solveGeometry(input, true);
+            }
+            if (clean.includes('°') || clean.match(/\d+\s+\d+/) && (input.includes('angle') || input.includes('triangle'))) {
+                return mathEngine.solveTriangle(input, 'interior', true);
+            }
+            if (clean.includes('=') && clean.includes('x')) {
+                return mathEngine.solveAlgebra(input, true);
+            }
+            if (clean.match(/^[\d\s+\-*/.^()%]+$/)) {
+                return mathEngine.solveAlgebra(input, true);
+            }
+            return false;
+        },
+
+        solveAlgebra: (input, silent) => {
+            let html = '';
+            if (input.includes('=') && input.includes('x')) {
+                const sides = input.split('=');
+                const left = sides[0].trim();
+                const right = sides[1].trim();
+                const coeffMatch = left.match(/([-+]?\d*\.?\d*)x\s*([-+]\s*\d+\.?\d*)?/);
+                if (coeffMatch) {
+                    let coeff = parseFloat(coeffMatch[1]);
+                    if (isNaN(coeff)) coeff = left.startsWith('-') ? -1 : 1;
+                    const constPart = coeffMatch[2] ? parseFloat(coeffMatch[2].replace(/\s/g,'')) : 0;
+                    const rhs = parseFloat(right);
+                    if (!isNaN(rhs) && coeff !== 0) {
+                        const x = (rhs - constPart) / coeff;
+                        html += mathEngine.formatStep("Equation", `${left} = ${right}`);
+                        html += mathEngine.formatStep("Isolate x", constPart !== 0 ? `${coeff}x = ${rhs - constPart}` : `${coeff}x = ${rhs}`);
+                        html += mathEngine.formatStep("Divide both sides by " + coeff, `x = ${(rhs - constPart)} ÷ ${coeff}`);
+                        html += `<div class="final-ans">x = ${x}</div>`;
+                        if (!silent) ui.solutionBox.innerHTML = html;
+                        return true;
+                    }
+                }
+            }
+            try {
+                const res = mathEngine.evaluateExpression(input);
+                html += mathEngine.formatStep("Expression", input);
+                html += `<div class="final-ans">= ${res}</div>`;
+                if (!silent) ui.solutionBox.innerHTML = html;
+                return true;
+            } catch (e) { return false; }
+        },
+
+        solveLinear: (input, silent) => {
+            let eq = input.replace(/\s+/g, '');
+            if (!eq.includes('y=')) eq = 'y=' + eq;
+            const regex = /y=([-+]?\d*\.?\d*)?x([-+]\d*\.?\d*)?/;
+            const match = eq.match(regex);
+            if (!match) { if (!silent) throw new Error("Format: y = mx + b"); return false; }
+            let m = parseFloat(match[1]);
+            if (isNaN(m)) m = eq.includes('-x') ? -1 : 1;
+            if (!eq.includes('x')) m = 0;
+            let b = parseFloat(match[2]) || 0;
+            if (m === 0) b = parseFloat(match[1]) || 0;
+            let html = mathEngine.formatStep("Equation Type", "Linear Slope-Intercept");
+            html += mathEngine.formatStep("Slope (m)", m);
+            html += mathEngine.formatStep("Y-Intercept (b)", b);
+            if (m !== 0) html += mathEngine.formatStep("X-Intercept", `(${(-b / m).toFixed(2)}, 0)`);
+            html += `<div class="final-ans">y = ${m}x + ${b}</div>`;
+            ui.solutionBox.innerHTML = html;
+            drawCoordinateSystem();
+            drawLinearLine(m, b);
+            ui.graphCard.classList.remove('hidden');
+            return true;
+        },
+
+        solveIntercepts: (input) => {
+            const nums = input.match(/-?\d+(\.\d+)?/g);
+            if (!nums || nums.length < 2) throw new Error("Provide x-intercept then y-intercept");
+            const xi = parseFloat(nums[0]);
+            const yi = parseFloat(nums[1]);
+            if (xi === 0) throw new Error("X-intercept cannot be 0");
+            const m = -yi / xi;
+            let html = mathEngine.formatStep("X-Intercept Given", `(${xi}, 0)`);
+            html += mathEngine.formatStep("Y-Intercept Given", `(0, ${yi})`);
+            html += mathEngine.formatStep("Slope", `m = (${yi} - 0) / (0 - ${xi}) = ${m.toFixed(4)}`);
+            html += `<div class="final-ans">y = ${m.toFixed(3)}x + ${yi}</div>`;
+            ui.solutionBox.innerHTML = html;
+            drawCoordinateSystem();
+            drawLinearLine(m, yi);
+            ui.graphCard.classList.remove('hidden');
+        },
+
+        solveGeometry: (input, silent) => {
+            const pts = input.match(/-?\d+(\.\d+)?/g);
+            if (!pts || pts.length < 4) { if (!silent) throw new Error("Need 4 numbers: x1 y1 x2 y2"); return false; }
+            const [x1, y1, x2, y2] = pts.map(parseFloat);
+            const dx = x2 - x1, dy = y2 - y1;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const slope = dx !== 0 ? dy / dx : null;
+            const midX = (x1 + x2) / 2, midY = (y1 + y2) / 2;
+            let html = mathEngine.formatStep("Point A", `(${x1}, ${y1})`);
+            html += mathEngine.formatStep("Point B", `(${x2}, ${y2})`);
+            html += mathEngine.formatStep("Distance Formula", `√[(${x2}-${x1})² + (${y2}-${y1})²]`);
+            html += mathEngine.formatStep("Distance", dist.toFixed(4) + " units");
+            html += mathEngine.formatStep("Slope", slope !== null ? slope.toFixed(4) : 'Undefined (vertical line)');
+            html += mathEngine.formatStep("Midpoint", `(${midX}, ${midY})`);
+            ui.solutionBox.innerHTML = html;
+            drawCoordinateSystem();
+            drawPoint(x1, y1, '#ef4444');
+            drawPoint(x2, y2, '#3b82f6');
+            ui.ctx.strokeStyle = '#8b5cf6';
+            ui.ctx.lineWidth = 2;
+            ui.ctx.setLineDash([6, 4]);
+            ui.ctx.beginPath();
+            ui.ctx.moveTo(toCanvasX(x1), toCanvasY(y1));
+            ui.ctx.lineTo(toCanvasX(x2), toCanvasY(y2));
+            ui.ctx.stroke();
+            ui.ctx.setLineDash([]);
+            ui.graphCard.classList.remove('hidden');
+            return true;
+        },
+
+        solveTriangle: (input, type, silent) => {
+            const angles = input.match(/\d+(\.\d+)?/g);
+            if (!angles || angles.length < 2) { if (!silent) throw new Error("Need at least 2 angles"); return false; }
+            const a = parseFloat(angles[0]);
+            const b = parseFloat(angles[1]);
+            if (type === 'interior') {
+                const c = 180 - (a + b);
+                if (c <= 0) throw new Error("Sum exceeds 180°");
+                let html = mathEngine.formatStep("Angle A", a + "°");
+                html += mathEngine.formatStep("Angle B", b + "°");
+                html += mathEngine.formatStep("Triangle Sum Theorem", "A + B + C = 180°");
+                html += mathEngine.formatStep("Calculation", `180 - (${a} + ${b}) = ${c}`);
+                html += `<div class="final-ans">Missing Angle C = ${c}°</div>`;
+                ui.solutionBox.innerHTML = html;
+            } else {
+                const ext = a + b;
+                let html = mathEngine.formatStep("Interior Angle 1", a + "°");
+                html += mathEngine.formatStep("Interior Angle 2", b + "°");
+                html += mathEngine.formatStep("Exterior Angle Theorem", "Exterior = Sum of non-adjacent interiors");
+                html += `<div class="final-ans">Exterior Angle = ${ext}°</div>`;
+                ui.solutionBox.innerHTML = html;
+            }
+            ui.graphCard.classList.add('hidden');
+            return true;
+        }
+    };
+
+    const drawCoordinateSystem = () => {
+        const c = ui.canvas, ctx = ui.ctx;
+        ctx.clearRect(0, 0, c.width, c.height);
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        const sp = 25;
+        for (let i = 0; i < c.width; i += sp) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, c.height); ctx.stroke(); }
+        for (let i = 0; i < c.height; i += sp) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(c.width, i); ctx.stroke(); }
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(c.width / 2, 0); ctx.lineTo(c.width / 2, c.height); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, c.height / 2); ctx.lineTo(c.width, c.height / 2); ctx.stroke();
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px Inter, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        for (let x = -15; x <= 15; x += 5) {
+            if (x === 0) continue;
+            ctx.fillText(x, toCanvasX(x), c.height / 2 + 16);
+        }
+        ctx.textAlign = 'left';
+        for (let y = -9; y <= 9; y += 3) {
+            if (y === 0) continue;
+            ctx.fillText(y, c.width / 2 + 5, toCanvasY(y) + 4);
+        }
+    };
+
+    const toCanvasX = (x) => ui.canvas.width / 2 + (x * 25);
+    const toCanvasY = (y) => ui.canvas.height / 2 - (y * 25);
+
+    const drawPoint = (x, y, color) => {
+        ui.ctx.fillStyle = color;
+        ui.ctx.beginPath();
+        ui.ctx.arc(toCanvasX(x), toCanvasY(y), 7, 0, Math.PI * 2);
+        ui.ctx.fill();
+        ui.ctx.fillStyle = 'white';
+        ui.ctx.beginPath();
+        ui.ctx.arc(toCanvasX(x), toCanvasY(y), 3, 0, Math.PI * 2);
+        ui.ctx.fill();
+    };
+
+    const drawLinearLine = (m, b) => {
+        ui.ctx.strokeStyle = SUBJECT_COLORS[appState.subject] || '#0ea5e9';
+        ui.ctx.lineWidth = 3;
+        ui.ctx.shadowColor = SUBJECT_COLORS[appState.subject] || '#0ea5e9';
+        ui.ctx.shadowBlur = 8;
+        ui.ctx.beginPath();
+        ui.ctx.moveTo(toCanvasX(-20), toCanvasY(m * -20 + b));
+        ui.ctx.lineTo(toCanvasX(20), toCanvasY(m * 20 + b));
+        ui.ctx.stroke();
+        ui.ctx.shadowBlur = 0;
+        drawPoint(0, b, SUBJECT_COLORS[appState.subject] || '#0ea5e9');
+    };
+
+    const noteSystem = {
+        save: () => {
+            localStorage.setItem('lgpa_notes', JSON.stringify(appState.notes));
+            notify("Note saved!", 'success');
+        },
+        render: () => {
+            ui.notesTabs.innerHTML = '<div class="note-tab" id="newNoteBtn">+ New Note</div>';
+            appState.notes.forEach((n, i) => {
+                const div = document.createElement('div');
+                div.className = `note-tab ${appState.currentIndex === i ? 'active' : ''}`;
+                div.innerText = n.title || 'Untitled';
+                div.dataset.index = i;
+                div.addEventListener('click', () => {
+                    appState.currentIndex = i;
+                    ui.noteTitle.value = n.title || '';
+                    ui.noteContent.innerHTML = n.content || '';
+                    ui.deleteNoteBtn.classList.remove('hidden');
+                    noteSystem.render();
+                });
+                div.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    appState.activeContextNote = i;
+                    ui.contextMenu.style.left = e.pageX + 'px';
+                    ui.contextMenu.style.top = e.pageY + 'px';
+                    ui.contextMenu.classList.remove('hidden');
+                });
+                ui.notesTabs.appendChild(div);
+            });
+            document.getElementById('newNoteBtn').addEventListener('click', () => {
+                appState.currentIndex = -1;
+                ui.noteTitle.value = '';
+                ui.noteContent.innerHTML = '';
+                ui.deleteNoteBtn.classList.add('hidden');
+                noteSystem.render();
+            });
+        }
+    };
+
+    const closeSidebar = () => {
+        ui.sidebar.classList.remove('open');
+        ui.sidebarOverlay.classList.remove('open');
+    };
+
+    const openModal = (modal) => modal.classList.remove('hidden');
+    const closeModal = (modal) => modal.classList.add('hidden');
+
+    const setupSubjectTabs = () => {
+        ui.navBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sub = btn.dataset.subject;
+                appState.subject = sub;
+                ui.navBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                ui.body.className = `theme-${sub}`;
+                if (sub === 'math') {
+                    ui.mathView.classList.remove('hidden');
+                    ui.aiView.classList.add('hidden');
+                } else {
+                    ui.mathView.classList.add('hidden');
+                    ui.aiView.classList.remove('hidden');
+                    ui.aiTitle.innerText = sub.charAt(0).toUpperCase() + sub.slice(1) + ' Assistant';
+                    const hist = appState.chatHistory[sub];
+                    if (hist.length === 0) {
+                        ui.aiResponse.innerHTML = `<div class="placeholder-msg">${SUBJECT_LABELS[sub].label}</div>`;
+                    } else {
+                        renderChatHistory(sub);
+                    }
+                    ui.aiPrompt.placeholder = SUBJECT_LABELS[sub].hints[Math.floor(Math.random() * SUBJECT_LABELS[sub].hints.length)];
+                }
+            });
+        });
+    };
+
+    const renderChatHistory = (subject) => {
+        ui.aiResponse.innerHTML = '';
+        appState.chatHistory[subject].forEach(msg => {
+            const div = document.createElement('div');
+            div.className = `chat-msg chat-${msg.role}`;
+            div.innerHTML = msg.text;
+            ui.aiResponse.appendChild(div);
+        });
+        ui.aiResponse.scrollTop = ui.aiResponse.scrollHeight;
+    };
+
+    const setupMathDropdown = () => {
+        ui.mathModeTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            ui.mathModeOptions.classList.toggle('hidden');
+        });
+        document.querySelectorAll('#mathModeOptions .custom-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                appState.mathMode = opt.dataset.value;
+                ui.mathModeTrigger.innerText = opt.innerText;
+                ui.mathModeOptions.classList.add('hidden');
+                if (appState.mathMode === 'triangle_in' || appState.mathMode === 'triangle_ex' || appState.mathMode === 'solve_any') {
+                    ui.graphCard.classList.add('hidden');
+                } else {
+                    ui.graphCard.classList.remove('hidden');
+                    drawCoordinateSystem();
+                }
+                ui.solutionBox.innerHTML = '<div class="placeholder-msg">Your step-by-step answer will appear here.</div>';
+            });
+        });
+    };
+
+    const setupSuggestionDropdown = () => {
+        ui.suggestionGenreTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            ui.suggestionGenreOptions.classList.toggle('hidden');
+        });
+        document.querySelectorAll('#suggestionGenreOptions .custom-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                appState.suggestionGenre = opt.dataset.value;
+                ui.suggestionGenreTrigger.innerText = opt.dataset.value;
+                ui.suggestionGenreOptions.classList.add('hidden');
+                const labels = {
+                    'AI Features': 'What should be improved?',
+                    'Website changes': 'What changes would you like?',
+                    'Geometry changes': 'What geometry improvements?'
+                };
+                ui.suggestionLabel.innerText = labels[opt.dataset.value] || 'What should be changed?';
+            });
+        });
+    };
+
+    const setupSolveBtn = () => {
+        ui.solveBtn.addEventListener('click', () => {
+            const val = ui.mathInput.innerText.trim();
+            if (!val) { notify("Enter a problem first"); return; }
+            ui.graphCard.classList.add('hidden');
+            try {
+                switch (appState.mathMode) {
+                    case 'linear': mathEngine.solveLinear(val, false); break;
+                    case 'intercepts': mathEngine.solveIntercepts(val); break;
+                    case 'geometry': mathEngine.solveGeometry(val, false); break;
+                    case 'triangle_in': mathEngine.solveTriangle(val, 'interior', false); break;
+                    case 'triangle_ex': mathEngine.solveTriangle(val, 'exterior', false); break;
+                    case 'algebra': mathEngine.solveAlgebra(val, false); break;
+                    default:
+                        const solved = mathEngine.detectAndSolve(val);
+                        if (!solved) {
+                            ui.solutionBox.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px"><b>Complex problem detected.</b><br><br>Click <b>Use AI Solver</b> below for a full solution.</div>';
+                        }
+                }
+            } catch (e) {
+                ui.solutionBox.innerHTML = `<div style="color:#ef4444;padding:15px;border-radius:8px;background:#fef2f2">⚠️ ${e.message}</div>`;
+            }
+        });
+    };
+
+    const setupAISolveBtn = () => {
+        ui.aiSolveBtn.addEventListener('click', async () => {
+            const val = ui.mathInput.innerText.trim();
+            if (!val) { notify("Enter a problem first"); return; }
+            ui.aiSolveBtn.disabled = true;
+            ui.aiSolveBtn.innerText = 'Thinking...';
+            ui.solutionBox.innerHTML = '<div class="thinking-dots"><span>.</span><span>.</span><span>.</span></div>';
+            const sys = 'You are an expert math tutor. Solve step-by-step with clear notation. Format: numbered steps, show each operation, box the final answer. No LaTeX. Use plain text symbols like x^2 for squared.';
+            const res = await callAI(val, sys);
+            ui.solutionBox.innerHTML = res ? `<p>${res}</p>` : '<div style="color:#ef4444">AI unavailable. Check connection or try the local solver above.</div>';
+            ui.aiSolveBtn.disabled = false;
+            ui.aiSolveBtn.innerText = 'Use AI Solver';
+        });
+    };
+
+    const setupAIChatBtn = () => {
+        const sendChat = async () => {
+            const p = ui.aiPrompt.value.trim();
+            if (!p) return;
+            const sub = appState.subject;
+            ui.aiPrompt.value = '';
+            ui.askAiBtn.disabled = true;
+
+            appState.chatHistory[sub].push({ role: 'user', text: p });
+            renderChatHistory(sub);
+
+            const thinkDiv = document.createElement('div');
+            thinkDiv.className = 'chat-msg chat-assistant';
+            thinkDiv.innerHTML = '<div class="thinking-dots"><span>.</span><span>.</span><span>.</span></div>';
+            ui.aiResponse.appendChild(thinkDiv);
+            ui.aiResponse.scrollTop = ui.aiResponse.scrollHeight;
+
+            const systems = {
+                math: 'You are a math tutor for a high school student. Solve clearly, show all steps, explain reasoning. Be encouraging.',
+                english: 'You are an English tutor. Help with essays, grammar, literary analysis, and writing. Give specific feedback and examples.',
+                history: 'You are a history teacher. Explain events with context, causes, and consequences. Use timelines and comparisons when helpful.',
+                science: 'You are a science tutor. Explain concepts clearly, use real-world analogies, include formulas when relevant. Keep it engaging.'
+            };
+
+            const fullCtx = buildChatContext(sub, p, systems[sub]);
+            const res = await callAI(fullCtx, null);
+            const aiText = res || 'AI is currently unavailable. Please check your connection and try again.';
+
+            appState.chatHistory[sub].push({ role: 'assistant', text: aiText });
+            thinkDiv.innerHTML = aiText;
+            ui.aiResponse.scrollTop = ui.aiResponse.scrollHeight;
+            ui.askAiBtn.disabled = false;
+        };
+
+        ui.askAiBtn.addEventListener('click', sendChat);
+        ui.aiPrompt.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+        });
+    };
+
+    const setupNotes = () => {
+        ui.notesBtn.addEventListener('click', () => { openModal(ui.notesModal); noteSystem.render(); });
+        ui.mobileNotesBtn.addEventListener('click', () => { closeSidebar(); openModal(ui.notesModal); noteSystem.render(); });
+        document.getElementById('closeNotesBtn').addEventListener('click', () => closeModal(ui.notesModal));
+        ui.notesBackdrop.addEventListener('click', () => closeModal(ui.notesModal));
+
+        ui.saveNoteBtn.addEventListener('click', () => {
+            const n = { title: ui.noteTitle.value || 'Untitled', content: ui.noteContent.innerHTML };
+            if (appState.currentIndex === -1) {
+                appState.notes.push(n);
+                appState.currentIndex = appState.notes.length - 1;
+            } else {
+                appState.notes[appState.currentIndex] = n;
+            }
+            noteSystem.save();
+            noteSystem.render();
+        });
+
+        ui.deleteNoteBtn.addEventListener('click', () => {
+            if (appState.currentIndex === -1) return;
+            appState.notes.splice(appState.currentIndex, 1);
+            appState.currentIndex = -1;
+            ui.noteTitle.value = '';
+            ui.noteContent.innerHTML = '';
+            ui.deleteNoteBtn.classList.add('hidden');
+            localStorage.setItem('lgpa_notes', JSON.stringify(appState.notes));
+            noteSystem.render();
+            notify("Note deleted");
+        });
+
+        ui.boldBtn.addEventListener('click', () => { ui.noteContent.focus(); document.execCommand('bold'); });
+        ui.italicBtn.addEventListener('click', () => { ui.noteContent.focus(); document.execCommand('italic'); });
+    };
+
+    const setupContextMenu = () => {
+        document.addEventListener('click', () => ui.contextMenu.classList.add('hidden'));
+        ui.renameNoteOption.addEventListener('click', () => {
+            ui.contextMenu.classList.add('hidden');
+            const idx = appState.activeContextNote;
+            if (idx < 0 || idx >= appState.notes.length) return;
+            const newName = prompt('New note name:', appState.notes[idx].title || 'Untitled');
+            if (newName !== null && newName.trim() !== '') {
+                appState.notes[idx].title = newName.trim();
+                localStorage.setItem('lgpa_notes', JSON.stringify(appState.notes));
+                noteSystem.render();
+                notify("Note renamed");
+            }
+        });
+    };
+
+    const setupSettings = () => {
+        ui.settingsBtn.addEventListener('click', () => openModal(ui.settingsModal));
+        ui.mobileSettingsBtn.addEventListener('click', () => { closeSidebar(); openModal(ui.settingsModal); });
+        ui.closeSettingsBtn.addEventListener('click', () => closeModal(ui.settingsModal));
+        ui.settingsBackdrop.addEventListener('click', () => closeModal(ui.settingsModal));
+
+        ui.iconUpload.addEventListener('change', (e) => {
+            const f = e.target.files[0];
+            if (f) ui.fileName.innerText = f.name;
+        });
+
+        ui.applySettingsBtn.addEventListener('click', () => {
+            const title = ui.settingsTitleInput.value.trim();
+            const iconUrl = ui.settingsIconUrlInput.value.trim();
+            const file = ui.iconUpload.files[0];
+
+            if (title) document.title = title;
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => { ui.dynamicFavicon.href = e.target.result; };
+                reader.readAsDataURL(file);
+            } else if (iconUrl) {
+                ui.dynamicFavicon.href = iconUrl;
+            }
+
+            closeModal(ui.settingsModal);
+            notify("Settings applied!", 'success');
+        });
+    };
+
+    const setupSuggestion = () => {
+        ui.suggestionBtn.addEventListener('click', () => openModal(ui.suggestionModal));
+        ui.mobileSuggestionBtn.addEventListener('click', () => { closeSidebar(); openModal(ui.suggestionModal); });
+        ui.closeSuggestionBtn.addEventListener('click', () => closeModal(ui.suggestionModal));
+        ui.suggestionBackdrop.addEventListener('click', () => closeModal(ui.suggestionModal));
+
+        ui.submitSuggestionBtn.addEventListener('click', async () => {
+            const text = ui.suggestionInput.value.trim();
+            if (!text) { notify("Write something first"); return; }
+            ui.submitSuggestionBtn.disabled = true;
+            ui.submitSuggestionBtn.innerText = 'Sending...';
+            const sys = 'You are a friendly product team member. The user just sent a suggestion for a school learning website. Acknowledge it warmly in 1-2 sentences, say you love the idea, and mention one specific thing about their suggestion.';
+            const res = await callAI(`Category: ${appState.suggestionGenre}\nSuggestion: ${text}`, sys);
+            closeModal(ui.suggestionModal);
+            notify(res ? res.replace(/<[^>]+>/g, '').slice(0, 100) : "Thanks for the feedback! We'll consider it.", 'success');
+            ui.suggestionInput.value = '';
+            ui.submitSuggestionBtn.disabled = false;
+            ui.submitSuggestionBtn.innerText = 'Send Suggestion';
+        });
+    };
+
+    const setupNavLinks = () => {
+        ui.docsBtn.addEventListener('click', () => window.open('/document/', '_blank'));
+        ui.mobileDocsBtn.addEventListener('click', () => { closeSidebar(); window.open('/document/', '_blank'); });
+        ui.discordBtn.addEventListener('click', () => window.open('https://discord.gg/', '_blank'));
+        ui.mobileDiscordBtn.addEventListener('click', () => { closeSidebar(); window.open('https://discord.gg/', '_blank'); });
+    };
+
+    const setupMobileSidebar = () => {
+        ui.mobileMenuBtn.addEventListener('click', () => {
+            ui.sidebar.classList.add('open');
+            ui.sidebarOverlay.classList.add('open');
+        });
+        ui.sidebarOverlay.addEventListener('click', closeSidebar);
+        document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
+    };
+
+    const setupDegreeBtn = () => {
+        ui.degreeBtn.addEventListener('click', () => {
+            ui.mathInput.focus();
+            document.execCommand('insertText', false, '°');
+        });
+    };
+
+    const closeOpenDropdowns = (e) => {
+        if (!e.target.closest('#mathModeOptions') && !e.target.closest('#mathModeTrigger')) {
+            ui.mathModeOptions.classList.add('hidden');
+        }
+        if (!e.target.closest('#suggestionGenreOptions') && !e.target.closest('#suggestionGenreTrigger')) {
+            ui.suggestionGenreOptions.classList.add('hidden');
+        }
+    };
+
+    document.addEventListener('click', closeOpenDropdowns);
+
+    setupSubjectTabs();
+    setupMathDropdown();
+    setupSuggestionDropdown();
+    setupSolveBtn();
+    setupAISolveBtn();
+    setupAIChatBtn();
+    setupNotes();
+    setupContextMenu();
+    setupSettings();
+    setupSuggestion();
+    setupNavLinks();
+    setupMobileSidebar();
+    setupDegreeBtn();
+    drawCoordinateSystem();
+
+});

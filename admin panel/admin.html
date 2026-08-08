@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="create">Create Account</button>
+                <button class="auth-tab" data-tab="login">Login</button>
+            </div>
+            
+            <div class="auth-form" id="createForm">
+                <h2>Create Account</h2>
+                <div class="form-group">
+                    <label>Enter account username</label>
+                    <input type="text" id="createUsername" class="auth-input" placeholder="Username">
+                </div>
+                <div class="form-group">
+                    <label>Enter account password</label>
+                    <input type="password" id="createPassword" class="auth-input" placeholder="Password">
+                </div>
+                <div class="form-group">
+                    <label>Enter admin keycode</label>
+                    <input type="password" id="createKeycode" class="auth-input" placeholder="learning-xxxxx">
+                </div>
+                <button id="createBtn" class="auth-btn">Create Account</button>
+            </div>
+            
+            <div class="auth-form hidden" id="loginForm">
+                <h2>Login</h2>
+                <div class="form-group">
+                    <label>Enter account username</label>
+                    <input type="text" id="loginUsername" class="auth-input" placeholder="Username">
+                </div>
+                <div class="form-group">
+                    <label>Enter account password</label>
+                    <input type="password" id="loginPassword" class="auth-input" placeholder="Password">
+                </div>
+                <button id="loginBtn" class="auth-btn">Login to account</button>
+            </div>
+        </div>
+        
+        <div class="admin-dashboard hidden" id="adminDashboard">
+            <div class="dashboard-header">
+                <h1>Admin Panel</h1>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+            <div class="feedback-section">
+                <h2>Feedbacks</h2>
+                <div id="feedbackList" class="feedback-list"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="admin.js"></script>
+</body>
+</html>

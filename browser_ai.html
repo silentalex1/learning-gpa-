@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser AI - qwen2.5-coder:14b</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .chat { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+        .message { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .user { background: #007bff; color: white; margin-left: 20px; }
+        .ai { background: #e0e0e0; margin-right: 20px; }
+        input { width: 70%; padding: 10px; }
+        button { padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Browser AI - qwen2.5-coder:14b</h1>
+        <div class="chat" id="chat"></div>
+        <input type="text" id="message" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <script type="module">
+        import * as webllm from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.47/dist/mlc-web-llm.min.js";
+
+        const chat = document.getElementById('chat');
+        const messageInput = document.getElementById('message');
+        let engine = null;
+
+        async function init() {
+            try {
+                engine = new webllm.MLCEngine();
+                await engine.reload({
+                    model_lib_url: "https://huggingface.co/mlc-ai/Phi-3-mini-4k-instruct-q4f16_1-MLC/resolve/main/",
+                    model_url: "https://huggingface.co/mlc-ai/Phi-3-mini-4k-instruct-q4f16_1-MLC/resolve/main/params/"
+                });
+                addMessage("AI loaded successfully!", "ai");
+            } catch (e) {
+                addMessage("Failed to load AI: " + e.message, "ai");
+            }
+        }
+
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = 'message ' + type;
+            div.textContent = text;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function init() {
+            try {
+                engine = new webllm.MLCEngine();
+                await engine.reload({
+                    model_lib_url: "https://huggingface.co/mlc-ai/Phi-3-mini-4k-instruct-q4f16_1-MLC/resolve/main/",
+                    model_url: "https://huggingface.co/mlc-ai/Phi-3-mini-4k-instruct-q4f16_1-MLC/resolve/main/params/"
+                });
+                addMessage("AI loaded successfully!", "ai");
+            } catch (e) {
+                addMessage("Failed to load AI: " + e.message, "ai");
+            }
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || !engine) return;
+
+            addMessage(message, 'user');
+            messageInput.value = '';
+
+            try {
+                const reply = await engine.chat.completions.create({
+                    messages: [{ role: "user", content: message }],
+                    max_gen_tokens: 256,
+                });
+                addMessage(reply.choices[0].message.content, 'ai');
+            } catch (e) {
+                addMessage("Error: " + e.message, 'ai');
+            }
+        }
+
+        init();
+        window.sendMessage = sendMessage;
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

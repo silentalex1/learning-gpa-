@@ -141,6 +141,10 @@ app.get('/admin-panel', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin panel', 'admin.html'));
 });
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

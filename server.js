@@ -5,11 +5,11 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(__dirname));
 
 const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 const FEEDBACKS_FILE = path.join(__dirname, 'feedbacks.json');
@@ -21,19 +21,35 @@ let accounts = [];
 let feedbacks = [];
 
 if (fs.existsSync(ACCOUNTS_FILE)) {
-    accounts = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
+    try {
+        accounts = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
+    } catch (e) {
+        accounts = [];
+    }
 }
 
 if (fs.existsSync(FEEDBACKS_FILE)) {
-    feedbacks = JSON.parse(fs.readFileSync(FEEDBACKS_FILE, 'utf8'));
+    try {
+        feedbacks = JSON.parse(fs.readFileSync(FEEDBACKS_FILE, 'utf8'));
+    } catch (e) {
+        feedbacks = [];
+    }
 }
 
 function saveAccounts() {
-    fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accounts, null, 2));
+    try {
+        fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accounts, null, 2));
+    } catch (e) {
+        console.error('Error saving accounts:', e);
+    }
 }
 
 function saveFeedbacks() {
-    fs.writeFileSync(FEEDBACKS_FILE, JSON.stringify(feedbacks, null, 2));
+    try {
+        fs.writeFileSync(FEEDBACKS_FILE, JSON.stringify(feedbacks, null, 2));
+    } catch (e) {
+        console.error('Error saving feedbacks:', e);
+    }
 }
 
 function generateKeycode() {
